@@ -12,8 +12,8 @@ import HelloWorld from './components/HelloWorld.vue'
 
 <style scoped>
 .header {
-  height: 6em;
-  background-image: linear-gradient(to top, #4C41F5 100%, #58AAF9 100%);
+  height: 350px;
+  background-image: linear-gradient(to right, #4C41F5 25%, #58AAF9 100%);
 }
 
 .logo {
