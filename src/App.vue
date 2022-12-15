@@ -8,29 +8,69 @@ import AveAi from "./components/AveAi.vue";
 
 <template>
   <div class="header">
+    <a-row>
+      <a-col :span="12">
+        <h1>Secufox</h1>
+      </a-col>
+      <a-col :span="12" class="click">
+        <a-button size="large" ghost> I'm a developer</a-button>
+      </a-col>
+    </a-row>
+    <div class="retrieval">
+      <a-row>
+        <a-col :offset="3" :span="3">
+          <h2>Demo Experience</h2>
+        </a-col>
+      </a-row>
+      <a-row>
+        <a-col :offset="3">
+          <h3>Fast token security detection service</h3>
+        </a-col>
+      </a-row>
+
+    </div>
   </div>
   <HelloWorld msg="Vite + Vue" />
-  <GoPlus/>
+  <GoPlus />
   <AveAi />
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .header {
   height: 350px;
-  background-image: linear-gradient(to right, #4C41F5 25%, #58AAF9 100%);
+  background: linear-gradient(89.97deg, #4C41F5 1.5%, #58AAF9 100%);
+  padding: 24px 60px;
+
+  .retrieval {
+    margin-top: 60px;
+  }
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
+h1 {
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 42px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #FFFFFF;
 }
 
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+h2 {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 31px;
+  color: #FFFFFF;
 }
 
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+h3 {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  color: #FFFFFF;
+}
+
+.click {
+  justify-content: right;
+  display: flex;
 }
 </style>

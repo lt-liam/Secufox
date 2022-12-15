@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "IBM Plex Mono";
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -15,9 +15,12 @@
   -webkit-text-size-adjust: 100%;
 }
 
+body {
+  font-family: "IBM Plex Mono" !important;
+}
+
 #app {
   margin: 0 auto;
-  text-align: center;
 }
 
 @media (prefers-color-scheme: light) {

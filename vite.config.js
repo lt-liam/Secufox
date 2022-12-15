@@ -25,7 +25,7 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/goplus/, ''),
       },
-      "/aveai":{
+      "/aveai": {
         target: 'https://api.aaave.cloud',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/aveai/, ''),
@@ -37,5 +37,15 @@ export default defineConfig({
     Components({
       resolvers: [AntDesignVueResolver()]
     }),
-  ]
+  ],
+  css: {
+    preprocessorOptions: {
+      less: {
+        modifyVars: {
+          hack: `true; @import (reference) "${resolve(__dirname, 'src/theme/index.less')}"`
+        },
+        javascriptEnabled: true
+      },
+    },
+  },
 })
