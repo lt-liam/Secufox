@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue'
+import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+
 const SecuFox = ref('src/assets/SecuFox.png')
 
 const chains = ref([{
@@ -11,6 +13,62 @@ const chains = ref([{
 }]);
 
 let chain = ref('bsc');
+
+
+const resultList = ref([{
+  result: true,
+  label: 'This token contract is open source.',
+  base_on: []
+},
+{
+  result: false,
+  label: 'There is no proxy in the contract.',
+  base_on: []
+},
+{
+  result: true,
+  label: 'Mint function is transparent or non- existent.',
+  base_on: []
+},
+{
+  result: true,
+  label: 'Can not take back ownership.',
+  base_on: []
+},
+{
+  result: true,
+  label: "Owner can't change balance.",
+  base_on: []
+},
+{
+  result: true,
+  label: 'Has not dropped admin privileges.',
+  base_on: []
+},
+{
+  result: true,
+  label: 'No hidden owner address was found for the token.',
+  base_on: []
+},
+{
+  result: true,
+  label: 'This token can not self destruct.',
+  base_on: []
+}, {
+  result: true,
+  label: 'No external call risk found.',
+  base_on: []
+},
+{
+  result: true,
+  label: 'Slippage cannot be modified.',
+  base_on: []
+}, {
+  result: true,
+  label: 'LP is locked.',
+  base_on: []
+}])
+
 </script>
 
 <template>
@@ -20,7 +78,7 @@ let chain = ref('bsc');
         <img class="logo" :src="SecuFox" />
       </a-col>
       <a-col :span="12" class="click">
-        <a-button size="large" href="#/contract-code-audit" ghost> I'm a developer</a-button>
+        <a-button size="large" href="#/contract-code-audit" ghost>Contract Code Audit</a-button>
       </a-col>
     </a-row>
     <div class="retrieval">
@@ -48,14 +106,18 @@ let chain = ref('bsc');
       </a-row>
     </div>
   </div>
-  <div class="result">
-    <div class="resultTitle">Detect Result</div>
-    <a-card style="width: 100%;margin-top: 37px;">
-      <p>Card content</p>
-      <p>Card content</p>
-      <p>Card content</p>
-    </a-card>
-  </div>
+  <a-row class="result">
+    <a-col :span="12">
+      <a-card style="width: 100%;">
+        <div class="title">Contract Security</div>
+        <div v-for="result in resultList">
+          <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
+          <exclamation-circle-outlined v-else :style="{ fontSize: '16px', color: '#F5AF1C' }" />
+          <span style="margin-left: 10px;">{{ result.label }}</span>
+        </div>
+      </a-card>
+    </a-col>
+  </a-row>
 </template>
 
 <style scoped lang="less">
@@ -98,10 +160,11 @@ h3 {
 .result {
   padding: 24px 53px;
 
-  .resultTitle {
+  .title {
     font-weight: 700;
-    font-size: 32px;
-    line-height: 42px;
+    font-size: 24px;
+    line-height: 31px;
+    margin-bottom: 30px;
   }
 }
 </style>
