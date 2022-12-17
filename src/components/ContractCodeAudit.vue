@@ -11,6 +11,31 @@ const chains = ref([{
 }]);
 let chain = ref('eth');
 
+let WarnNote = ref('Contract code automatic detection platform, providing fast, accurate and aggregated contract vulnerability detection result')
+
+const reportList = ref([
+  {
+    title: "Initialization",
+    content: "Get Contract Code file"
+  },
+  {
+    title: "Tool name",
+    content: "Tool Description"
+  },
+  {
+    title: "Tool name",
+    content: "Tool Description"
+  },
+  {
+    title: "Tool name",
+    content: "Tool Description"
+  },
+  {
+    title: "Result",
+    content: "Details"
+  }
+])
+
 </script>
 
 <template>
@@ -30,7 +55,7 @@ let chain = ref('eth');
       </a-row>
       <a-row>
         <a-col :offset="5">
-          <h3>Fast and aggregated contract security check service</h3>
+          <h3>Fast contract code audit service</h3>
         </a-col>
       </a-row>
       <a-row :style="{ marginTop: '35px' }" :gutter="16">
@@ -58,41 +83,71 @@ let chain = ref('eth');
       </a-row>
     </div>
   </div>
+  <div class="report">
+    <a-timeline>
+      <a-timeline-item color="gray" v-for="report in reportList">
+        <a-card>
+          <h2>
+            {{ report.title }}
+          </h2>
+          <p>
+            {{ report.content }}
+          </p>
+        </a-card>
+      </a-timeline-item>
+    </a-timeline>
+  </div>
 </template>
 
 <style scoped lang="less">
 .header {
-  height: 350px;
+  height: 400px;
   background: linear-gradient(89.97deg, #4C41F5 1.5%, #58AAF9 100%);
   padding: 24px 40px;
+
+  h2 {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 31px;
+    color: #FFFFFF;
+    margin-left: 1px;
+  }
+
+  h3 {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    color: #FFFFFF;
+    margin-left: 2px;
+  }
+
+  .logo {
+    width: 185px;
+    height: 42px;
+  }
 
   .retrieval {
     margin-top: 60px;
   }
+
+  .upload:deep(.ant-upload) {
+    width: 100%;
+  }
 }
 
-.logo {
-  width: 185px;
-  height: 42px;
-}
+.report {
+  margin: 30px 250px 0px 250px;
 
-h2 {
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 31px;
-  color: #FFFFFF;
-  margin-left: 1px;
-}
+  h2 {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 24px;
+  }
 
-h3 {
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 18px;
-  color: #FFFFFF;
-  margin-left: 2px;
-}
-
-.upload:deep(.ant-upload) {
-  width: 100%;
+  p {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+  }
 }
 </style>
