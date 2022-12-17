@@ -70,12 +70,108 @@
     <a-col :span="8">
       <div>
         <div class="title">Check Result</div>
+        <div>score:  {{ basicInfo.risk_score}}</div>
+        <div>Risky item: {{ riskItemNum }}</div>
+        <div>Attention item: {{ attentionItemNum }}</div>
+        <div>checked Item : {{scanItemNum}}</div>
       </div>
       <div>
         <div class="title">Basic Info</div>
+        <a-list  item-layout="horizontal" :split="false" size="small">
+          <a-list-item>
+            <template #actions>
+              <b>{{basicInfo.name}}</b>
+            </template>
+            <div>
+              Token Name
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b>{{basicInfo.symbol}}</b>
+            </template>
+            <div>
+              Token Symbol
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b><address-display :address="basicInfo.address"/></b>
+            </template>
+            <div>
+              Token Address
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b><address-display :address="basicInfo.creator"/></b>
+            </template>
+            <div>
+              Contract Creator
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b><address-display :address="basicInfo.owner"/></b>
+            </template>
+            <div>
+              Contract Owner
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b>{{basicInfo.holders}}</b>
+            </template>
+            <div>
+              Token Holders
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b>{{ toPercentage(basicInfo.ratio) }}</b>
+            </template>
+            <div>
+              Top10 Token Holders Ratio
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b>{{basicInfo.lp_holders}}</b>
+            </template>
+            <div>
+              LP Holders
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b>{{ toPercentage(basicInfo.lp_locaked)}}</b>
+            </template>
+            <div>
+              Percent of LP Locked
+            </div>
+          </a-list-item>
+        </a-list>
       </div>
       <div>
         <div class="title">Trade & Liquidity</div>
+        <a-list item-layout="horizontal" :split="false" size="small">
+          <a-list-item>
+            <template #actions>
+              <b>{{basicInfo.buy_tax}}</b>
+            </template>
+            <div>
+              Buy Tax
+            </div>
+          </a-list-item>
+          <a-list-item>
+            <template #actions>
+              <b>{{basicInfo.sell_tax}}</b>
+            </template>
+            <div>
+              Sell Tax
+            </div>
+          </a-list-item>
+        </a-list>
       </div>
       <div>
         <div class="title">More results please refer:</div>
@@ -86,9 +182,10 @@
 
 
 <script setup>
-import { ref } from 'vue'
+import {computed, ref} from 'vue'
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import axios from "axios";
+import AddressDisplay from "./AddressDisplay.vue";
 
 const SecuFox = ref('src/assets/SecuFox.png');
 
@@ -377,7 +474,6 @@ const pushHonkeby = (key, value, result) => {
 }
 
 const query = () => {
-
   loading.value = true
   Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()]).then(result => {
     if (result[0] && result[0].status === 200) {
@@ -485,6 +581,11 @@ const query = () => {
       if(aveaiData.personal_slippage_modifiable){
         pushHonkeby(KEY_PERSONAL_TAX_CHANGES,aveAi,aveaiData.personal_slippage_modifiable === '0')
       }
+      if(aveaiData.risk_score){
+        basicInfo.value.risk_score = aveaiData.risk_score
+      }else {
+        basicInfo.value.risk_score = ''
+      }
     }
 
     if(result[2] && result[2].status === 200) {
@@ -554,8 +655,27 @@ const queryBityingPromise = () => {
 }
 
 const toPercentage = (num) => {
-  return num.toFixed(4)*100+'%'
+  if(isNumber(num)) {
+    return num.toFixed(4) * 100 + '%'
+  }else {
+    return num
+  }
 }
+
+const isNumber = (obj) => {
+  return obj === +obj
+}
+
+const riskItemNum = computed(()=>{
+  return 0
+})
+const attentionItemNum = computed(()=> {
+  return 0
+})
+
+const scanItemNum = computed(()=>{
+  return 20
+})
 </script>
 
 <style scoped lang="less">
