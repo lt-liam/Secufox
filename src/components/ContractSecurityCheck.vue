@@ -82,6 +82,32 @@
       </div>
     </a-col>
   </a-row>
+
+  <a-row class="result">
+    <a-col :span="12">
+      <a-card style="width: 100%;" :loading="loading">
+        <div class="title">Honeypot Risk</div>
+        <div v-for="result in honkebyList">
+          <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
+          <exclamation-circle-outlined v-else :style="{ fontSize: '16px', color: '#F5AF1C' }" />
+          <span style="margin-left: 10px;">{{ result.label }}</span>
+
+          <span style="text-align: right"> {{result.base_on}}</span>
+        </div>
+      </a-card>
+    </a-col>
+
+
+  </a-row>
+  <a-row>
+    <a-col>
+      <a-descriptions bordered title="BasicInfo">
+        <a-descriptions-item label="Token Name">
+          {{ toPercentage(basicInfo.top10_token_holders_ratio)}}
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-col>
+  </a-row>
 </template>
 
 
@@ -119,6 +145,20 @@ const KEY_EXTERNAL_CALL = 'external_call'
 const KEY_SLIPPAGE_MODIFIED = 'slippage_modified'
 const KEY_LP_LOCKED = 'lp_locked'
 // 合约安全数据
+const KEY_HONEYPOT = 'honeypot'
+const KEY_TRANSFER_PAUSE = 'transfer_pause'
+const KEY_CAN_SELL = 'can_sell'
+const KEY_CAN_BUY = 'can_buy'
+const KEY_TRADING_COOLDOWN = 'trading_cooldown'
+const KEY_WHITELIST = 'whitelist'
+const KEY_BLACKLIST = 'blacklist'
+const KEY_PERSONAL_TAX_CHANGES = 'tax_change'
+const KEY_LIMITED_TRANSACTIONS = 'limited_transactions'
+
+const basicInfo = ref({
+
+})
+
 const securitys = ref([{
   result: false,
   key: KEY_OPENSOURCE,
@@ -296,6 +336,78 @@ const pushResult = (key, value, result) => {
     }
   }
 }
+
+const honkebyList = ref([
+  {
+    result: false,
+    key: KEY_HONEYPOT,
+    label: 'This does not appear to be a honeypot.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_TRANSFER_PAUSE,
+    label: 'Transfer can pause.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_CAN_SELL,
+    label: 'Holders can sell all of the token.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_CAN_BUY,
+    label: 'The token can bought.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_TRADING_COOLDOWN,
+    label: 'No trading-cool-down mechanism. ',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_WHITELIST,
+    label: 'No whitelist.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_BLACKLIST,
+    label: 'No blacklist.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_PERSONAL_TAX_CHANGES,
+    label: 'No tax changes found for personal address.',
+    base_on: []
+  },
+  {
+    result: false,
+    key: KEY_LIMITED_TRANSACTIONS,
+    label: 'limited number of transactions.',
+    base_on: []
+  },
+])
+
+
+
+const pushHonkeby = (key, value, result) => {
+  let index = honkebyList.value.findIndex(t => t.key === key)
+  if(index >= 0) {
+    if (honkebyList.value[index].base_on.findIndex(t => t === value) === -1 ){
+      honkebyList.value[index].base_on.push(value)
+      if (result !== undefined) {
+        honkebyList.value[index].result = result
+      }
+    }
+  }
+}
+
 const query = () => {
 
   loading.value = true
@@ -314,26 +426,100 @@ const query = () => {
       pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
       pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
         return total && s.is_locked === 0
-      }, true))
+      }, true ))
+
+      pushHonkeby(KEY_HONEYPOT,goPlus,goPlusResult.is_honeypot === '0')
+      pushHonkeby(KEY_TRANSFER_PAUSE,goPlus,goPlusResult.transfer_pausable === '0')
+      pushHonkeby(KEY_CAN_SELL,goPlus,goPlusResult.cannot_sell_all === '0')
+      pushHonkeby(KEY_CAN_BUY,goPlus,goPlusResult.cannot_buy === '0')
+      pushHonkeby(KEY_TRADING_COOLDOWN,goPlus,goPlusResult.trading_cooldown === '0')
+      pushHonkeby(KEY_WHITELIST,goPlus,goPlusResult.is_whitelisted === '0')
+      pushHonkeby(KEY_BLACKLIST,goPlus,goPlusResult.is_blacklisted === '0')
+      pushHonkeby(KEY_PERSONAL_TAX_CHANGES,goPlus,goPlusResult.personal_slippage_modifiable === '0')
+      pushHonkeby(KEY_LIMITED_TRANSACTIONS,goPlus,goPlusResult.is_anti_whale === '0')
+
+
+      basicInfo.value.token_name = goPlusResult.token_name
+      basicInfo.value.token_symbol = goPlusResult.token_symbol
+      basicInfo.value.token_address = Object.entries(result[0].data.result)[0][0]
+      basicInfo.value.creator_address = goPlusResult.creator_address
+      basicInfo.value.owner_address = goPlusResult.owner_address
+      basicInfo.value.holder_count = goPlusResult.holder_count
+      basicInfo.value.top10_token_holders_ratio = goPlusResult.holders.reduce((total,item) => {
+        return total+ parseFloat(item.percent)
+      },0)
+      basicInfo.value.lp_holder_count = goPlusResult.lp_holder_count
+      basicInfo.value.lp_lock_percetage = goPlusResult.lp_holders.reduce((total,item)=> {
+        return total+ parseFloat(item.percent)
+      },0)
+      basicInfo.value.buy_tax = goPlusResult.buy_tax
+      basicInfo.value.sell_tax = goPlusResult.sell_tax
     }
 
     if (result[1] && result[1].status === 200) {
       let aveaiData = result[1].data.data.token_contract.contract_data
 
-      pushResult(KEY_OPENSOURCE, aveAi, aveaiData.has_code === 1)
-      pushResult(KEY_PROXY, aveAi, aveaiData.is_proxy === '0')
-      pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 1)
-      pushResult(KEY_TAKEOWNERSHIP, aveAi, aveaiData.can_take_back_ownership === '0')
-      pushResult(KEY_OWNER_CHANGE_BALANCE, aveAi, aveaiData.owner_change_balance === '0')
-      pushResult(KEY_ADMIN_PRIVILEGES, aveAi, aveaiData.owner === '')
-      pushResult(KEY_HIDDEN_OWNER, aveAi, aveaiData.hidden_owner === '0')
-      pushResult(KEY_SELF_DESTRUCT, aveAi, aveaiData.selfdestruct === '0')
-      pushResult(KEY_EXTERNAL_CALL, aveAi, aveaiData.external_call === '0')
-      pushResult(KEY_SLIPPAGE_MODIFIED, aveAi, aveaiData.slippage_modifiable === 0)
-      pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent === 0)
+      if(aveaiData.has_code) {
+        pushResult(KEY_OPENSOURCE, aveAi, aveaiData.has_code === 1)
+      }
+      if(aveaiData.is_proxy) {
+        pushResult(KEY_PROXY, aveAi, aveaiData.is_proxy === '0')
+      }
+      if(aveaiData.has_mint_method) {
+        pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 1)
+      }
+      if(aveaiData.can_take_back_ownership) {
+        pushResult(KEY_TAKEOWNERSHIP, aveAi, aveaiData.can_take_back_ownership === '0')
+      }
+      if(aveaiData.owner_change_balance){
+        pushResult(KEY_OWNER_CHANGE_BALANCE,aveAi,aveaiData.owner_change_balance === '0')
+      }
+      if(aveaiData.owner) {
+        pushResult(KEY_ADMIN_PRIVILEGES, aveAi, aveaiData.owner === '')
+      }
+      if(aveaiData.hidden_owner){
+        pushResult(KEY_HIDDEN_OWNER,aveAi,aveaiData.hidden_owner === '0')
+      }
+      if(aveaiData.selfdestruct){
+        pushResult(KEY_SELF_DESTRUCT,aveAi,aveaiData.selfdestruct === '0')
+      }
+      if(aveaiData.external_call){
+        pushResult(KEY_EXTERNAL_CALL,aveAi,aveaiData.external_call === '0')
+      }
+      if(aveaiData.slippage_modifiable){
+        pushResult(KEY_SLIPPAGE_MODIFIED,aveAi,aveaiData.slippage_modifiable === 0)
+      }
+      if(aveaiData.pair_lock_percent){
+        pushResult(KEY_LP_LOCKED,aveAi,aveaiData.pair_lock_percent === 0)
+      }
+
+      if(aveaiData.is_honeypot){
+        pushHonkeby(KEY_HONEYPOT,aveAi,aveaiData.is_honeypot === -1 )
+      }
+      if(aveaiData.transfer_pausable){
+        pushHonkeby(KEY_TRANSFER_PAUSE,aveAi,aveaiData.transfer_pausable === '0')
+      }
+      if(aveaiData.cannot_sell_all){
+        pushHonkeby(KEY_CAN_SELL,aveAi,aveaiData.cannot_sell_all === '0')
+      }
+      if(aveaiData.cannot_buy){
+        pushHonkeby(KEY_CAN_BUY,aveAi,aveaiData.cannot_buy === '0')
+      }
+      if(aveaiData.trading_cooldown){
+        pushHonkeby(KEY_TRADING_COOLDOWN,aveAi,aveaiData.trading_cooldown === '0')
+      }
+      if(aveaiData.has_white_method){
+        pushHonkeby(KEY_WHITELIST,aveAi,aveaiData.has_white_method === 0)
+      }
+      if(aveaiData.has_black_method){
+        pushHonkeby(KEY_BLACKLIST,aveAi,aveaiData.has_black_method === 0)
+      }
+      if(aveaiData.personal_slippage_modifiable){
+        pushHonkeby(KEY_PERSONAL_TAX_CHANGES,aveAi,aveaiData.personal_slippage_modifiable === '0')
+      }
     }
 
-    if (result[2] && result[2].status === 200) {
+    if(result[2] && result[2].status === 200) {
       let bityingData = result[2].data.data
       let remask = bityingData.remask
       remask.forEach(item => {
@@ -348,6 +534,12 @@ const query = () => {
         }
         if (item.content === '不能更改滑点') {
           pushResult(KEY_SLIPPAGE_MODIFIED, bitying, item.ispassed === 1)
+        }
+        if (item.content === '不存在黑名单'){
+          pushHonkeby(KEY_BLACKLIST,bitying,item.ispassed === 1)
+        }
+        if (item.content === '不存在交易锁'){
+          pushHonkeby(KEY_LP_LOCKED,bitying,item.ispassed === 1)
         }
       })
     }
@@ -393,6 +585,9 @@ const queryBityingPromise = () => {
   )
 }
 
+const toPercentage = (num) => {
+  return num.toFixed(4)*100+'%'
+}
 </script>
 
 <style scoped lang="less">
