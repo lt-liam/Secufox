@@ -4,7 +4,7 @@
       <a-col :span="12">
         <img class="logo" :src="SecuFox" />
       </a-col>
-      <a-col :span="12" class="click">
+      <a-col :span="12" class="content-right">
         <a-button size="large" href="#/contract-code-audit" ghost>Contract Code Audit</a-button>
       </a-col>
     </a-row>
@@ -16,35 +16,70 @@
       </a-row>
       <a-row>
         <a-col :offset="5">
-          <h3>Fast token security detection service</h3>
+          <h3>Fast and aggregated contract security check service</h3>
         </a-col>
       </a-row>
       <a-row :style="{ marginTop: '35px' }" :gutter="16">
         <a-col :offset="5" :span="2">
           <a-select size="large" ghost ref="select" style="width: 100%" v-model:value="chain"
-                    :options="chains"></a-select>
+            :options="chains"></a-select>
         </a-col>
         <a-col :span="9">
-          <a-input size="large" ghost placeholder="Enter Token Address" v-model:value="address"  />
+          <a-input size="large" ghost placeholder="Enter Token Address" v-model:value="address" />
         </a-col>
         <a-col :span="3">
           <a-button :style="{ width: '100%' }" size="large" ghost @click="query" :loading="loading">Check</a-button>
         </a-col>
       </a-row>
+      <a-row :style="{ marginTop: '15px' }">
+        <a-col :offset="5" :span="11">
+          <h3>{{ WarnNote }}</h3>
+        </a-col>
+      </a-row>
     </div>
   </div>
   <a-row class="result">
-    <a-col :span="12">
+    <a-col :span="16">
       <a-card style="width: 100%;" :loading="loading">
         <div class="title">Contract Security</div>
-        <div v-for="result in resultList">
-          <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
-          <exclamation-circle-outlined v-else :style="{ fontSize: '16px', color: '#F5AF1C' }" />
-          <span style="margin-left: 10px;">{{ result.label }}</span>
-
-          <span style="text-align: right"> {{result.base_on}}</span>
+        <div v-for="result in securitys">
+          <a-row>
+            <a-col :span="20" style="line-height: 32px;">
+              <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
+              <exclamation-circle-outlined v-else :style="{ fontSize: '16px', color: '#F5AF1C' }" />
+              <span style="margin-left: 10px;">{{ result.label }}</span>
+            </a-col>
+            <a-col :span="4" class="content-right"><img v-for="base_on in result.base_on" :src="base_on" /></a-col>
+          </a-row>
         </div>
       </a-card>
+      <a-card style="width: 100%;" :style="{ marginTop: '24px' }" :loading="loading">
+        <div class="title">Honeypot Risk</div>
+        <div v-for="result in securitys">
+          <a-row>
+            <a-col :span="20" style="line-height: 32px;">
+              <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
+              <exclamation-circle-outlined v-else :style="{ fontSize: '16px', color: '#F5AF1C' }" />
+              <span style="margin-left: 10px;">{{ result.label }}</span>
+            </a-col>
+            <a-col :span="4" class="content-right"><img v-for="base_on in result.base_on" :src="base_on" /></a-col>
+          </a-row>
+        </div>
+      </a-card>
+    </a-col>
+    <a-col :span="8">
+      <div>
+        <div class="title">Check Result</div>
+      </div>
+      <div>
+        <div class="title">Basic Info</div>
+      </div>
+      <div>
+        <div class="title">Trade & Liquidity</div>
+      </div>
+      <div>
+        <div class="title">More results please refer:</div>
+      </div>
     </a-col>
   </a-row>
 </template>
@@ -55,7 +90,11 @@ import { ref } from 'vue'
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import axios from "axios";
 
-const SecuFox = ref('src/assets/SecuFox.png')
+const SecuFox = ref('src/assets/SecuFox.png');
+
+const WarnNote = ref('Note: Results provided by third parties, we try detect all contract risks, ' +
+  'but cannot guarantee 100% identification of all risks. ' +
+  'It is recommended to use the detection results as a reference.');
 
 const chains = ref([{
   value: 'bsc',
@@ -79,8 +118,8 @@ const KEY_SELF_DESTRUCT = 'self_destruct'
 const KEY_EXTERNAL_CALL = 'external_call'
 const KEY_SLIPPAGE_MODIFIED = 'slippage_modified'
 const KEY_LP_LOCKED = 'lp_locked'
-
-const resultList = ref([{
+// 合约安全数据
+const securitys = ref([{
   result: false,
   key: KEY_OPENSOURCE,
   label: 'This token contract is open source.',
@@ -144,76 +183,171 @@ const resultList = ref([{
   label: 'LP is locked.',
   base_on: []
 }])
+// 蜜罐风险数据
+const risks = ref([{
+  result: false,
+  key: KEY_OPENSOURCE,
+  label: 'This does not appear to be a honeypot.',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_PROXY,
+  label: 'Transfer can pause..',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_MINT,
+  label: 'Holders can sell all of the token.',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_TAKEOWNERSHIP,
+  label: 'The token can be bought.',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_OWNER_CHANGE_BALANCE,
+  label: "No trading-cool-down mechanism.",
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_ADMIN_PRIVILEGES,
+  label: 'No whitelist.',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_HIDDEN_OWNER,
+  label: 'No blacklist.',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_SELF_DESTRUCT,
+  label: 'Tax cannot be modified.',
+  base_on: []
+}, {
+  result: false,
+  key: KEY_EXTERNAL_CALL,
+  label: 'No tax changes found for personal addresses.',
+  base_on: []
+},
+{
+  result: false,
+  key: KEY_SLIPPAGE_MODIFIED,
+  label: 'Slippage cannot be modified.',
+  base_on: []
+}, {
+  result: false,
+  key: KEY_LP_LOCKED,
+  label: 'limited number of transactions.',
+  base_on: []
+}])
+// 校验结果数据
+const checkResult = ref({
+  error: 0,
+  warn: 1,
+  security: 20,
+  percent: 55
+})
+// 基本数据
+const basicInfo = ref({
+  name: "MetamonkeyAi",
+  symbol: "MMAI",
+  address: "0xB8c7...1bDD52",
+  creator: "0xB8c7...1bDD52",
+  owner: "0xB8c7...1bDD52",
+  holders: "1093",
+  ratio: "58.17%",
+  lp_holders: "3",
+  lp_locaked: "93.17%"
+})
+// 交易和流动性
+const tradeInfo = ref({
+  buyTax: "5%",
+  sellTax: "10%"
+})
+// 更多链接
+const moreLink = ref([{
+  icon: "",
+  name: "",
+  link: ""
+}])
 
 const loading = ref(false)
 
-const goPlus = 'goPlus'
-const aveAi = 'aveAi'
-const bitying = 'bitying'
+const aveAi = 'src/assets/AveAi.svg';
+const bitying = 'src/assets/Bitying.svg';
+const goPlus = 'src/assets/GoPlus.svg';
 
 const pushResult = (key, value, result) => {
-  let index = resultList.value.findIndex(t => t.key === key)
-  if(index >= 0) {
-    if (resultList.value[index].base_on.findIndex(t => t === value) === -1 ){
-      resultList.value[index].base_on.push(value)
+  let index = securitys.value.findIndex(t => t.key === key)
+  if (index >= 0) {
+    if (securitys.value[index].base_on.findIndex(t => t === value) === -1) {
+      securitys.value[index].base_on.push(value)
       if (result !== undefined) {
-        resultList.value[index].result = result
+        securitys.value[index].result = result
       }
     }
   }
 }
-const query = ()=> {
+const query = () => {
 
   loading.value = true
-  Promise.all([queryGoPlusPromise(),queryAveAiPromise(),queryBityingPromise()]).then(result => {
-    if(result[0] && result[0].status === 200){
+  Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()]).then(result => {
+    if (result[0] && result[0].status === 200) {
       let goPlusResult = Object.values(result[0].data.result)[0]
-      pushResult(KEY_OPENSOURCE,goPlus,goPlusResult.is_open_source === '1')
-      pushResult(KEY_PROXY,goPlus,goPlusResult.is_proxy === '0')
-      pushResult(KEY_MINT,goPlus,goPlusResult.is_mintable === '1')
-      pushResult(KEY_TAKEOWNERSHIP,goPlus,goPlusResult.can_take_back_ownership === '0')
-      pushResult(KEY_OWNER_CHANGE_BALANCE,goPlus,goPlusResult.owner_change_balance === '0')
-      pushResult(KEY_ADMIN_PRIVILEGES,goPlus,goPlusResult.owner_address === '')
-      pushResult(KEY_HIDDEN_OWNER,goPlus,goPlusResult.hidden_owner === '0')
-      pushResult(KEY_SELF_DESTRUCT,goPlus,goPlusResult.selfdestruct === '0')
-      pushResult(KEY_EXTERNAL_CALL,goPlus,goPlusResult.external_call === '0')
-      pushResult(KEY_SLIPPAGE_MODIFIED,goPlus,goPlusResult.slippage_modifiable === '0')
-      pushResult(KEY_LP_LOCKED,goPlus,goPlusResult.lp_holders.reduce((total, s) =>{
+      pushResult(KEY_OPENSOURCE, goPlus, goPlusResult.is_open_source === '1')
+      pushResult(KEY_PROXY, goPlus, goPlusResult.is_proxy === '0')
+      pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '1')
+      pushResult(KEY_TAKEOWNERSHIP, goPlus, goPlusResult.can_take_back_ownership === '0')
+      pushResult(KEY_OWNER_CHANGE_BALANCE, goPlus, goPlusResult.owner_change_balance === '0')
+      pushResult(KEY_ADMIN_PRIVILEGES, goPlus, goPlusResult.owner_address === '')
+      pushResult(KEY_HIDDEN_OWNER, goPlus, goPlusResult.hidden_owner === '0')
+      pushResult(KEY_SELF_DESTRUCT, goPlus, goPlusResult.selfdestruct === '0')
+      pushResult(KEY_EXTERNAL_CALL, goPlus, goPlusResult.external_call === '0')
+      pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
+      pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
         return total && s.is_locked === 0
-      }, true ))
+      }, true))
     }
 
-    if(result[1] && result[1].status === 200){
+    if (result[1] && result[1].status === 200) {
       let aveaiData = result[1].data.data.token_contract.contract_data
 
-      pushResult(KEY_OPENSOURCE,aveAi,aveaiData.has_code === 1)
-      pushResult(KEY_PROXY,aveAi,aveaiData.is_proxy === '0')
-      pushResult(KEY_MINT,aveAi,aveaiData.has_mint_method === 1)
-      pushResult(KEY_TAKEOWNERSHIP,aveAi,aveaiData.can_take_back_ownership === '0')
-      pushResult(KEY_OWNER_CHANGE_BALANCE,aveAi,aveaiData.owner_change_balance === '0')
-      pushResult(KEY_ADMIN_PRIVILEGES,aveAi,aveaiData.owner === '')
-      pushResult(KEY_HIDDEN_OWNER,aveAi,aveaiData.hidden_owner === '0')
-      pushResult(KEY_SELF_DESTRUCT,aveAi,aveaiData.selfdestruct === '0')
-      pushResult(KEY_EXTERNAL_CALL,aveAi,aveaiData.external_call === '0')
-      pushResult(KEY_SLIPPAGE_MODIFIED,aveAi,aveaiData.slippage_modifiable === 0)
-      pushResult(KEY_LP_LOCKED,aveAi,aveaiData.pair_lock_percent === 0)
+      pushResult(KEY_OPENSOURCE, aveAi, aveaiData.has_code === 1)
+      pushResult(KEY_PROXY, aveAi, aveaiData.is_proxy === '0')
+      pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 1)
+      pushResult(KEY_TAKEOWNERSHIP, aveAi, aveaiData.can_take_back_ownership === '0')
+      pushResult(KEY_OWNER_CHANGE_BALANCE, aveAi, aveaiData.owner_change_balance === '0')
+      pushResult(KEY_ADMIN_PRIVILEGES, aveAi, aveaiData.owner === '')
+      pushResult(KEY_HIDDEN_OWNER, aveAi, aveaiData.hidden_owner === '0')
+      pushResult(KEY_SELF_DESTRUCT, aveAi, aveaiData.selfdestruct === '0')
+      pushResult(KEY_EXTERNAL_CALL, aveAi, aveaiData.external_call === '0')
+      pushResult(KEY_SLIPPAGE_MODIFIED, aveAi, aveaiData.slippage_modifiable === 0)
+      pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent === 0)
     }
 
-    if(result[2] && result[2].status === 200) {
+    if (result[2] && result[2].status === 200) {
       let bityingData = result[2].data.data
       let remask = bityingData.remask
       remask.forEach(item => {
-        if (item.content === '合约代码开源'){
-          pushResult(KEY_OPENSOURCE,bitying,item.ispassed === 1)
+        if (item.content === '合约代码开源') {
+          pushResult(KEY_OPENSOURCE, bitying, item.ispassed === 1)
         }
-        if (item.content === '项目方没有过多特权'){
-          pushResult(KEY_ADMIN_PRIVILEGES,bitying,item.ispassed === 1)
+        if (item.content === '项目方没有过多特权') {
+          pushResult(KEY_ADMIN_PRIVILEGES, bitying, item.ispassed === 1)
         }
-        if (item.content === '不存在代币增发'){
-          pushResult(KEY_MINT,bitying,item.ispassed === 1)
+        if (item.content === '不存在代币增发') {
+          pushResult(KEY_MINT, bitying, item.ispassed === 1)
         }
-        if (item.content === '不能更改滑点'){
-          pushResult(KEY_SLIPPAGE_MODIFIED,bitying,item.ispassed === 1)
+        if (item.content === '不能更改滑点') {
+          pushResult(KEY_SLIPPAGE_MODIFIED, bitying, item.ispassed === 1)
         }
       })
     }
@@ -231,7 +365,7 @@ networkIdMap['bsc'] = 56
 const queryGoPlusPromise = () => {
   let networkId = 1
 
-  if(networkIdMap.has(chain.value)) {
+  if (networkIdMap.has(chain.value)) {
     networkId = networkIdMap[chain.value]
   }
   return axios.get(`/goplus/api/v1/token_security/${networkId}?contract_addresses=${address.value}`)
@@ -247,15 +381,15 @@ const queryAveAiPromise = () => {
   })
 }
 
-const queryBityingPromise = ()=> {
+const queryBityingPromise = () => {
   return axios.post('/bitying/ceye/contract',
-      {
-        "uname":"biteagle",
-        "chain":2,
-        "address":"0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
-        "time":new Date().getTime(),
-        "sign":"fDaSGLxOsiG0lTbnVVicECexBeNMZFVtlChy+78Bb6gg+PSO3ZP5O9QkDtIkypxqQ4iXYOnNwuM4pL/juQqs8slMOID0SJZXkbZ60ZeJv2+4Y2bxM/BNxyRyltrNMnfokAe+cpliW4FWk49miapIvnRE8T9iclUgNQmRba+p9tt/505JyB8io6NfVDr/OnTc3wu5oa3GKyM/LxST+qFHP/wzphfORMdJ8fD4NdfM9dFwMQqyD5hkmXeGqiUjZ1E9Cngsm7bBPx1qBMcVS7HQEV9OPSJtsU1nil9w0lSb1t/tjsOQnY+Z4TycCLMZbluwhSAei6RjXf3fBSmrISpM6g=="
-      }
+    {
+      "uname": "biteagle",
+      "chain": 2,
+      "address": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
+      "time": new Date().getTime(),
+      "sign": "fDaSGLxOsiG0lTbnVVicECexBeNMZFVtlChy+78Bb6gg+PSO3ZP5O9QkDtIkypxqQ4iXYOnNwuM4pL/juQqs8slMOID0SJZXkbZ60ZeJv2+4Y2bxM/BNxyRyltrNMnfokAe+cpliW4FWk49miapIvnRE8T9iclUgNQmRba+p9tt/505JyB8io6NfVDr/OnTc3wu5oa3GKyM/LxST+qFHP/wzphfORMdJ8fD4NdfM9dFwMQqyD5hkmXeGqiUjZ1E9Cngsm7bBPx1qBMcVS7HQEV9OPSJtsU1nil9w0lSb1t/tjsOQnY+Z4TycCLMZbluwhSAei6RjXf3fBSmrISpM6g=="
+    }
   )
 }
 
@@ -263,7 +397,7 @@ const queryBityingPromise = ()=> {
 
 <style scoped lang="less">
 .header {
-  height: 350px;
+  height: 400px;
   background: linear-gradient(89.97deg, #4C41F5 1.5%, #58AAF9 100%);
   padding: 24px 40px;
 
@@ -282,7 +416,7 @@ h2 {
   font-size: 24px;
   line-height: 31px;
   color: #FFFFFF;
-  margin-left: 1px;
+  margin-left: 2px;
 }
 
 h3 {
@@ -290,10 +424,10 @@ h3 {
   font-size: 14px;
   line-height: 18px;
   color: #FFFFFF;
-  margin-left: 2px;
+  margin-left: 3px;
 }
 
-.click {
+.content-right {
   justify-content: right;
   display: flex;
 }
@@ -305,7 +439,7 @@ h3 {
     font-weight: 700;
     font-size: 24px;
     line-height: 31px;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
   }
 }
 </style>
