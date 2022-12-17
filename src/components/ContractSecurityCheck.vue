@@ -454,6 +454,15 @@ const moreLink = ref([{
 }])
 
 const loading = ref(false)
+const goplusData = ref({
+  is_honeypot: '',
+  sell_tax: '0',
+  buy_tax: '0',
+  cannot_buy: '',
+  is_anti_whale: '',
+  slippage_modifiable: '',
+  transfer_pausable: '',
+})
 
 const aveAi = 'src/assets/AveAi.svg';
 const bitying = 'src/assets/Bitying.svg';
@@ -545,9 +554,10 @@ const query = () => {
   Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()]).then(result => {
     if (result[0] && result[0].status === 200) {
       let goPlusResult = Object.values(result[0].data.result)[0]
+      goplusData.value = goPlusResult
       pushResult(KEY_OPENSOURCE, goPlus, goPlusResult.is_open_source === '1')
       pushResult(KEY_PROXY, goPlus, goPlusResult.is_proxy === '0')
-      pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '1')
+      pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '0')
       pushResult(KEY_TAKEOWNERSHIP, goPlus, goPlusResult.can_take_back_ownership === '0')
       pushResult(KEY_OWNER_CHANGE_BALANCE, goPlus, goPlusResult.owner_change_balance === '0')
       pushResult(KEY_ADMIN_PRIVILEGES, goPlus, goPlusResult.owner_address === '')
@@ -555,10 +565,11 @@ const query = () => {
       pushResult(KEY_SELF_DESTRUCT, goPlus, goPlusResult.selfdestruct === '0')
       pushResult(KEY_EXTERNAL_CALL, goPlus, goPlusResult.external_call === '0')
       pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
-      pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
-        return total && s.is_locked === 0
-      }, true))
-
+      if(goPlusResult.lp_holders) {
+        pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
+          return total + s.is_locked === 1? parseFloat(s.percent): 0
+        }, 0) < 1)
+      }
       pushHonkeby(KEY_HONEYPOT, goPlus, goPlusResult.is_honeypot === '0')
       pushHonkeby(KEY_TRANSFER_PAUSE, goPlus, goPlusResult.transfer_pausable === '0')
       pushHonkeby(KEY_CAN_SELL, goPlus, goPlusResult.cannot_sell_all === '0')
@@ -580,9 +591,11 @@ const query = () => {
         return total + parseFloat(item.percent)
       }, 0)
       basicInfo.value.lp_holders = goPlusResult.lp_holder_count
-      basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total, item) => {
-        return total + parseFloat(item.percent)
-      }, 0)
+      if(goPlusResult.lp_holders) {
+        basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total, item) => {
+          return total + item.is_locked === 1? parseFloat(item.percent):0
+        }, 0)
+      }
       basicInfo.value.buy_tax = goPlusResult.buy_tax
       basicInfo.value.sell_tax = goPlusResult.sell_tax
     }
@@ -597,7 +610,7 @@ const query = () => {
         pushResult(KEY_PROXY, aveAi, aveaiData.is_proxy === '0')
       }
       if (aveaiData.has_mint_method) {
-        pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 1)
+        pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 0)
       }
       if (aveaiData.can_take_back_ownership) {
         pushResult(KEY_TAKEOWNERSHIP, aveAi, aveaiData.can_take_back_ownership === '0')
@@ -621,7 +634,7 @@ const query = () => {
         pushResult(KEY_SLIPPAGE_MODIFIED, aveAi, aveaiData.slippage_modifiable === 0)
       }
       if (aveaiData.pair_lock_percent) {
-        pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent === 0)
+        pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent < 1)
       }
 
       if (aveaiData.is_honeypot) {
@@ -665,9 +678,9 @@ const query = () => {
         if (item.content === '项目方没有过多特权') {
           pushResult(KEY_ADMIN_PRIVILEGES, bitying, item.ispassed === 1)
         }
-        if (item.content === '不存在代币增发') {
-          pushResult(KEY_MINT, bitying, item.ispassed === 1)
-        }
+        // if (item.content === '不存在代币增发') {
+        //   pushResult(KEY_MINT, bitying, item.ispassed === 1)
+        // }
         if (item.content === '不能更改滑点') {
           pushResult(KEY_SLIPPAGE_MODIFIED, bitying, item.ispassed === 1)
         }
@@ -734,14 +747,40 @@ const isNumber = (obj) => {
 }
 
 const riskItemNum = computed(() => {
-  return 0
+  let risk = 0;
+  if(goplusData.value.is_honeypot === '1'){
+    risk++
+  }
+  if(parseFloat(goplusData.value.sell_tax) > 0.1){
+    risk++
+  }
+  if (parseFloat(goplusData.value.buy_tax) > 0.1){
+    risk++
+  }
+  return risk
 })
 const attentionItemNum = computed(() => {
-  return 0
+  let attention = 0
+  if(goplusData.value.cannot_buy === '1'){
+    attention++
+  }
+  if(goplusData.value.is_anti_whale === '1'){
+    attention++
+  }
+  if(goplusData.value.slippage_modifiable === '1'){
+    attention++
+  }
+  if(goplusData.value.transfer_pausable === '1'){
+    attention++
+  }
+  if(goplusData.value.is_mintable === '1'){
+    attention++
+  }
+  return attention
 })
 
 const scanItemNum = computed(() => {
-  return 20
+  return 20 - riskItemNum.value - attentionItemNum.value
 })
 </script>
 
