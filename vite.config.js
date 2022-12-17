@@ -29,6 +29,16 @@ export default defineConfig({
         target: 'https://api.aaave.cloud',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/aveai/, ''),
+      },
+      "/tokensniffer": {
+        target: 'https://tokensniffer.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tokensniffer/, ''),
+      },
+      "/bitying": {
+        target: 'https://tool.bitying.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/bitying/, ''),
       }
     }
   },
