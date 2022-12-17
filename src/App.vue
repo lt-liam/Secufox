@@ -30,8 +30,5 @@ export default {
 </script>
 
 <template>
-  <a href="#/">Home</a> |
-  <a href="#/contract-security-check">ContractSecurityCheck</a> |
-  <a href="#/non-existent-path">Broken Link</a>
   <component :is="currentView" />
 </template>

@@ -1,12 +1,9 @@
 <template>
   <div class="header">
     <a-row>
-      <a-col :span="12">
+      <a href="#/">
         <img class="logo" :src="SecuFox" />
-      </a-col>
-      <a-col :span="12" class="content-right">
-        <a-button size="large" href="#/contract-code-audit" ghost>Contract Code Audit</a-button>
-      </a-col>
+      </a>
     </a-row>
     <div class="retrieval">
       <a-row>
@@ -70,17 +67,17 @@
     <a-col :span="8">
       <div>
         <div class="title">Check Result</div>
-        <div>score:  {{ basicInfo.risk_score}}</div>
+        <div>score: {{ basicInfo.risk_score }}</div>
         <div>Risky item: {{ riskItemNum }}</div>
         <div>Attention item: {{ attentionItemNum }}</div>
-        <div>checked Item : {{scanItemNum}}</div>
+        <div>checked Item : {{ scanItemNum }}</div>
       </div>
       <div>
         <div class="title">Basic Info</div>
-        <a-list  item-layout="horizontal" :split="false" size="small">
+        <a-list item-layout="horizontal" :split="false" size="small">
           <a-list-item>
             <template #actions>
-              <b>{{basicInfo.name}}</b>
+              <b>{{ basicInfo.name }}</b>
             </template>
             <div>
               Token Name
@@ -88,7 +85,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b>{{basicInfo.symbol}}</b>
+              <b>{{ basicInfo.symbol }}</b>
             </template>
             <div>
               Token Symbol
@@ -96,7 +93,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b><address-display :address="basicInfo.address"/></b>
+              <b><address-display :address="basicInfo.address" /></b>
             </template>
             <div>
               Token Address
@@ -104,7 +101,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b><address-display :address="basicInfo.creator"/></b>
+              <b><address-display :address="basicInfo.creator" /></b>
             </template>
             <div>
               Contract Creator
@@ -112,7 +109,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b><address-display :address="basicInfo.owner"/></b>
+              <b><address-display :address="basicInfo.owner" /></b>
             </template>
             <div>
               Contract Owner
@@ -120,7 +117,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b>{{basicInfo.holders}}</b>
+              <b>{{ basicInfo.holders }}</b>
             </template>
             <div>
               Token Holders
@@ -136,7 +133,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b>{{basicInfo.lp_holders}}</b>
+              <b>{{ basicInfo.lp_holders }}</b>
             </template>
             <div>
               LP Holders
@@ -144,7 +141,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b>{{ toPercentage(basicInfo.lp_locaked)}}</b>
+              <b>{{ toPercentage(basicInfo.lp_locaked) }}</b>
             </template>
             <div>
               Percent of LP Locked
@@ -157,7 +154,7 @@
         <a-list item-layout="horizontal" :split="false" size="small">
           <a-list-item>
             <template #actions>
-              <b>{{basicInfo.buy_tax}}</b>
+              <b>{{ basicInfo.buy_tax }}</b>
             </template>
             <div>
               Buy Tax
@@ -165,7 +162,7 @@
           </a-list-item>
           <a-list-item>
             <template #actions>
-              <b>{{basicInfo.sell_tax}}</b>
+              <b>{{ basicInfo.sell_tax }}</b>
             </template>
             <div>
               Sell Tax
@@ -182,7 +179,7 @@
 
 
 <script setup>
-import {computed, ref} from 'vue'
+import { computed, ref } from 'vue'
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import axios from "axios";
 import AddressDisplay from "./AddressDisplay.vue";
@@ -463,8 +460,8 @@ const honkebyRisk = ref([
 
 const pushHonkeby = (key, value, result) => {
   let index = honkebyRisk.value.findIndex(t => t.key === key)
-  if(index >= 0) {
-    if (honkebyRisk.value[index].base_on.findIndex(t => t === value) === -1 ){
+  if (index >= 0) {
+    if (honkebyRisk.value[index].base_on.findIndex(t => t === value) === -1) {
       honkebyRisk.value[index].base_on.push(value)
       if (result !== undefined) {
         honkebyRisk.value[index].result = result
@@ -490,17 +487,17 @@ const query = () => {
       pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
       pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
         return total && s.is_locked === 0
-      }, true ))
+      }, true))
 
-      pushHonkeby(KEY_HONEYPOT,goPlus,goPlusResult.is_honeypot === '0')
-      pushHonkeby(KEY_TRANSFER_PAUSE,goPlus,goPlusResult.transfer_pausable === '0')
-      pushHonkeby(KEY_CAN_SELL,goPlus,goPlusResult.cannot_sell_all === '0')
-      pushHonkeby(KEY_CAN_BUY,goPlus,goPlusResult.cannot_buy === '0')
-      pushHonkeby(KEY_TRADING_COOLDOWN,goPlus,goPlusResult.trading_cooldown === '0')
-      pushHonkeby(KEY_WHITELIST,goPlus,goPlusResult.is_whitelisted === '0')
-      pushHonkeby(KEY_BLACKLIST,goPlus,goPlusResult.is_blacklisted === '0')
-      pushHonkeby(KEY_PERSONAL_TAX_CHANGES,goPlus,goPlusResult.personal_slippage_modifiable === '0')
-      pushHonkeby(KEY_LIMITED_TRANSACTIONS,goPlus,goPlusResult.is_anti_whale === '0')
+      pushHonkeby(KEY_HONEYPOT, goPlus, goPlusResult.is_honeypot === '0')
+      pushHonkeby(KEY_TRANSFER_PAUSE, goPlus, goPlusResult.transfer_pausable === '0')
+      pushHonkeby(KEY_CAN_SELL, goPlus, goPlusResult.cannot_sell_all === '0')
+      pushHonkeby(KEY_CAN_BUY, goPlus, goPlusResult.cannot_buy === '0')
+      pushHonkeby(KEY_TRADING_COOLDOWN, goPlus, goPlusResult.trading_cooldown === '0')
+      pushHonkeby(KEY_WHITELIST, goPlus, goPlusResult.is_whitelisted === '0')
+      pushHonkeby(KEY_BLACKLIST, goPlus, goPlusResult.is_blacklisted === '0')
+      pushHonkeby(KEY_PERSONAL_TAX_CHANGES, goPlus, goPlusResult.personal_slippage_modifiable === '0')
+      pushHonkeby(KEY_LIMITED_TRANSACTIONS, goPlus, goPlusResult.is_anti_whale === '0')
 
 
       basicInfo.value.name = goPlusResult.token_name
@@ -509,13 +506,13 @@ const query = () => {
       basicInfo.value.creator = goPlusResult.creator_address
       basicInfo.value.owner = goPlusResult.owner_address
       basicInfo.value.holders = goPlusResult.holder_count
-      basicInfo.value.ratio = goPlusResult.holders.reduce((total,item) => {
-        return total+ parseFloat(item.percent)
-      },0)
+      basicInfo.value.ratio = goPlusResult.holders.reduce((total, item) => {
+        return total + parseFloat(item.percent)
+      }, 0)
       basicInfo.value.lp_holders = goPlusResult.lp_holder_count
-      basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total,item)=> {
-        return total+ parseFloat(item.percent)
-      },0)
+      basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total, item) => {
+        return total + parseFloat(item.percent)
+      }, 0)
       basicInfo.value.buy_tax = goPlusResult.buy_tax
       basicInfo.value.sell_tax = goPlusResult.sell_tax
     }
@@ -523,72 +520,72 @@ const query = () => {
     if (result[1] && result[1].status === 200) {
       let aveaiData = result[1].data.data.token_contract.contract_data
 
-      if(aveaiData.has_code) {
+      if (aveaiData.has_code) {
         pushResult(KEY_OPENSOURCE, aveAi, aveaiData.has_code === 1)
       }
-      if(aveaiData.is_proxy) {
+      if (aveaiData.is_proxy) {
         pushResult(KEY_PROXY, aveAi, aveaiData.is_proxy === '0')
       }
-      if(aveaiData.has_mint_method) {
+      if (aveaiData.has_mint_method) {
         pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 1)
       }
-      if(aveaiData.can_take_back_ownership) {
+      if (aveaiData.can_take_back_ownership) {
         pushResult(KEY_TAKEOWNERSHIP, aveAi, aveaiData.can_take_back_ownership === '0')
       }
-      if(aveaiData.owner_change_balance){
-        pushResult(KEY_OWNER_CHANGE_BALANCE,aveAi,aveaiData.owner_change_balance === '0')
+      if (aveaiData.owner_change_balance) {
+        pushResult(KEY_OWNER_CHANGE_BALANCE, aveAi, aveaiData.owner_change_balance === '0')
       }
-      if(aveaiData.owner) {
+      if (aveaiData.owner) {
         pushResult(KEY_ADMIN_PRIVILEGES, aveAi, aveaiData.owner === '')
       }
-      if(aveaiData.hidden_owner){
-        pushResult(KEY_HIDDEN_OWNER,aveAi,aveaiData.hidden_owner === '0')
+      if (aveaiData.hidden_owner) {
+        pushResult(KEY_HIDDEN_OWNER, aveAi, aveaiData.hidden_owner === '0')
       }
-      if(aveaiData.selfdestruct){
-        pushResult(KEY_SELF_DESTRUCT,aveAi,aveaiData.selfdestruct === '0')
+      if (aveaiData.selfdestruct) {
+        pushResult(KEY_SELF_DESTRUCT, aveAi, aveaiData.selfdestruct === '0')
       }
-      if(aveaiData.external_call){
-        pushResult(KEY_EXTERNAL_CALL,aveAi,aveaiData.external_call === '0')
+      if (aveaiData.external_call) {
+        pushResult(KEY_EXTERNAL_CALL, aveAi, aveaiData.external_call === '0')
       }
-      if(aveaiData.slippage_modifiable){
-        pushResult(KEY_SLIPPAGE_MODIFIED,aveAi,aveaiData.slippage_modifiable === 0)
+      if (aveaiData.slippage_modifiable) {
+        pushResult(KEY_SLIPPAGE_MODIFIED, aveAi, aveaiData.slippage_modifiable === 0)
       }
-      if(aveaiData.pair_lock_percent){
-        pushResult(KEY_LP_LOCKED,aveAi,aveaiData.pair_lock_percent === 0)
+      if (aveaiData.pair_lock_percent) {
+        pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent === 0)
       }
 
-      if(aveaiData.is_honeypot){
-        pushHonkeby(KEY_HONEYPOT,aveAi,aveaiData.is_honeypot === -1 )
+      if (aveaiData.is_honeypot) {
+        pushHonkeby(KEY_HONEYPOT, aveAi, aveaiData.is_honeypot === -1)
       }
-      if(aveaiData.transfer_pausable){
-        pushHonkeby(KEY_TRANSFER_PAUSE,aveAi,aveaiData.transfer_pausable === '0')
+      if (aveaiData.transfer_pausable) {
+        pushHonkeby(KEY_TRANSFER_PAUSE, aveAi, aveaiData.transfer_pausable === '0')
       }
-      if(aveaiData.cannot_sell_all){
-        pushHonkeby(KEY_CAN_SELL,aveAi,aveaiData.cannot_sell_all === '0')
+      if (aveaiData.cannot_sell_all) {
+        pushHonkeby(KEY_CAN_SELL, aveAi, aveaiData.cannot_sell_all === '0')
       }
-      if(aveaiData.cannot_buy){
-        pushHonkeby(KEY_CAN_BUY,aveAi,aveaiData.cannot_buy === '0')
+      if (aveaiData.cannot_buy) {
+        pushHonkeby(KEY_CAN_BUY, aveAi, aveaiData.cannot_buy === '0')
       }
-      if(aveaiData.trading_cooldown){
-        pushHonkeby(KEY_TRADING_COOLDOWN,aveAi,aveaiData.trading_cooldown === '0')
+      if (aveaiData.trading_cooldown) {
+        pushHonkeby(KEY_TRADING_COOLDOWN, aveAi, aveaiData.trading_cooldown === '0')
       }
-      if(aveaiData.has_white_method){
-        pushHonkeby(KEY_WHITELIST,aveAi,aveaiData.has_white_method === 0)
+      if (aveaiData.has_white_method) {
+        pushHonkeby(KEY_WHITELIST, aveAi, aveaiData.has_white_method === 0)
       }
-      if(aveaiData.has_black_method){
-        pushHonkeby(KEY_BLACKLIST,aveAi,aveaiData.has_black_method === 0)
+      if (aveaiData.has_black_method) {
+        pushHonkeby(KEY_BLACKLIST, aveAi, aveaiData.has_black_method === 0)
       }
-      if(aveaiData.personal_slippage_modifiable){
-        pushHonkeby(KEY_PERSONAL_TAX_CHANGES,aveAi,aveaiData.personal_slippage_modifiable === '0')
+      if (aveaiData.personal_slippage_modifiable) {
+        pushHonkeby(KEY_PERSONAL_TAX_CHANGES, aveAi, aveaiData.personal_slippage_modifiable === '0')
       }
-      if(aveaiData.risk_score){
+      if (aveaiData.risk_score) {
         basicInfo.value.risk_score = aveaiData.risk_score
-      }else {
+      } else {
         basicInfo.value.risk_score = ''
       }
     }
 
-    if(result[2] && result[2].status === 200) {
+    if (result[2] && result[2].status === 200) {
       let bityingData = result[2].data.data
       let remask = bityingData.remask
       remask.forEach(item => {
@@ -604,11 +601,11 @@ const query = () => {
         if (item.content === '不能更改滑点') {
           pushResult(KEY_SLIPPAGE_MODIFIED, bitying, item.ispassed === 1)
         }
-        if (item.content === '不存在黑名单'){
-          pushHonkeby(KEY_BLACKLIST,bitying,item.ispassed === 1)
+        if (item.content === '不存在黑名单') {
+          pushHonkeby(KEY_BLACKLIST, bitying, item.ispassed === 1)
         }
-        if (item.content === '不存在交易锁'){
-          pushHonkeby(KEY_LP_LOCKED,bitying,item.ispassed === 1)
+        if (item.content === '不存在交易锁') {
+          pushHonkeby(KEY_LP_LOCKED, bitying, item.ispassed === 1)
         }
       })
     }
@@ -655,9 +652,9 @@ const queryBityingPromise = () => {
 }
 
 const toPercentage = (num) => {
-  if(isNumber(num)) {
+  if (isNumber(num)) {
     return num.toFixed(4) * 100 + '%'
-  }else {
+  } else {
     return num
   }
 }
@@ -666,14 +663,14 @@ const isNumber = (obj) => {
   return obj === +obj
 }
 
-const riskItemNum = computed(()=>{
+const riskItemNum = computed(() => {
   return 0
 })
-const attentionItemNum = computed(()=> {
+const attentionItemNum = computed(() => {
   return 0
 })
 
-const scanItemNum = computed(()=>{
+const scanItemNum = computed(() => {
   return 20
 })
 </script>
