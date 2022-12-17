@@ -55,7 +55,7 @@
       </a-card>
       <a-card style="width: 100%;" :style="{ marginTop: '24px' }" :loading="loading">
         <div class="title">Honeypot Risk</div>
-        <div v-for="result in securitys">
+        <div v-for="result in honkebyRisk">
           <a-row>
             <a-col :span="20" style="line-height: 32px;">
               <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
@@ -80,32 +80,6 @@
       <div>
         <div class="title">More results please refer:</div>
       </div>
-    </a-col>
-  </a-row>
-
-  <a-row class="result">
-    <a-col :span="12">
-      <a-card style="width: 100%;" :loading="loading">
-        <div class="title">Honeypot Risk</div>
-        <div v-for="result in honkebyList">
-          <check-circle-outlined v-if="result.result" :style="{ fontSize: '16px', color: '#4FCA81' }" />
-          <exclamation-circle-outlined v-else :style="{ fontSize: '16px', color: '#F5AF1C' }" />
-          <span style="margin-left: 10px;">{{ result.label }}</span>
-
-          <span style="text-align: right"> {{result.base_on}}</span>
-        </div>
-      </a-card>
-    </a-col>
-
-
-  </a-row>
-  <a-row>
-    <a-col>
-      <a-descriptions bordered title="BasicInfo">
-        <a-descriptions-item label="Token Name">
-          {{ toPercentage(basicInfo.top10_token_holders_ratio)}}
-        </a-descriptions-item>
-      </a-descriptions>
     </a-col>
   </a-row>
 </template>
@@ -154,10 +128,6 @@ const KEY_WHITELIST = 'whitelist'
 const KEY_BLACKLIST = 'blacklist'
 const KEY_PERSONAL_TAX_CHANGES = 'tax_change'
 const KEY_LIMITED_TRANSACTIONS = 'limited_transactions'
-
-const basicInfo = ref({
-
-})
 
 const securitys = ref([{
   result: false,
@@ -337,7 +307,7 @@ const pushResult = (key, value, result) => {
   }
 }
 
-const honkebyList = ref([
+const honkebyRisk = ref([
   {
     result: false,
     key: KEY_HONEYPOT,
@@ -394,15 +364,13 @@ const honkebyList = ref([
   },
 ])
 
-
-
 const pushHonkeby = (key, value, result) => {
-  let index = honkebyList.value.findIndex(t => t.key === key)
+  let index = honkebyRisk.value.findIndex(t => t.key === key)
   if(index >= 0) {
-    if (honkebyList.value[index].base_on.findIndex(t => t === value) === -1 ){
-      honkebyList.value[index].base_on.push(value)
+    if (honkebyRisk.value[index].base_on.findIndex(t => t === value) === -1 ){
+      honkebyRisk.value[index].base_on.push(value)
       if (result !== undefined) {
-        honkebyList.value[index].result = result
+        honkebyRisk.value[index].result = result
       }
     }
   }
@@ -439,17 +407,17 @@ const query = () => {
       pushHonkeby(KEY_LIMITED_TRANSACTIONS,goPlus,goPlusResult.is_anti_whale === '0')
 
 
-      basicInfo.value.token_name = goPlusResult.token_name
-      basicInfo.value.token_symbol = goPlusResult.token_symbol
-      basicInfo.value.token_address = Object.entries(result[0].data.result)[0][0]
-      basicInfo.value.creator_address = goPlusResult.creator_address
-      basicInfo.value.owner_address = goPlusResult.owner_address
-      basicInfo.value.holder_count = goPlusResult.holder_count
-      basicInfo.value.top10_token_holders_ratio = goPlusResult.holders.reduce((total,item) => {
+      basicInfo.value.name = goPlusResult.token_name
+      basicInfo.value.symbol = goPlusResult.token_symbol
+      basicInfo.value.address = Object.entries(result[0].data.result)[0][0]
+      basicInfo.value.creator = goPlusResult.creator_address
+      basicInfo.value.owner = goPlusResult.owner_address
+      basicInfo.value.holders = goPlusResult.holder_count
+      basicInfo.value.ratio = goPlusResult.holders.reduce((total,item) => {
         return total+ parseFloat(item.percent)
       },0)
-      basicInfo.value.lp_holder_count = goPlusResult.lp_holder_count
-      basicInfo.value.lp_lock_percetage = goPlusResult.lp_holders.reduce((total,item)=> {
+      basicInfo.value.lp_holders = goPlusResult.lp_holder_count
+      basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total,item)=> {
         return total+ parseFloat(item.percent)
       },0)
       basicInfo.value.buy_tax = goPlusResult.buy_tax
