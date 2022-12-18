@@ -278,8 +278,8 @@ const chains = ref([{
   label: 'ETH',
 }]);
 
-let chain = ref('eth');
-let address = ref('0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39')
+let chain = ref('bsc');
+let address = ref('0x31230a6f280b4227efb58c3bcb51733fd3621b7a')
 
 const KEY_OPENSOURCE = 'opensource'
 const KEY_PROXY = 'proxy'
@@ -551,45 +551,115 @@ const pushHonkeby = (key, value, result) => {
 
 const query = () => {
   loading.value = true
-  Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()]).then(result => {
-    if (result[0] && result[0].status === 200) {
+  Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()])
+      .then(result => {
+    if (result[0] && result[0].status === 200 && Object.values(result[0].data.result).length > 0) {
       let goPlusResult = Object.values(result[0].data.result)[0]
       goplusData.value = goPlusResult
-      pushResult(KEY_OPENSOURCE, goPlus, goPlusResult.is_open_source === '1')
-      pushResult(KEY_PROXY, goPlus, goPlusResult.is_proxy === '0')
-      pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '0')
-      pushResult(KEY_TAKEOWNERSHIP, goPlus, goPlusResult.can_take_back_ownership === '0')
-      pushResult(KEY_OWNER_CHANGE_BALANCE, goPlus, goPlusResult.owner_change_balance === '0')
-      pushResult(KEY_ADMIN_PRIVILEGES, goPlus, goPlusResult.owner_address === '')
-      pushResult(KEY_HIDDEN_OWNER, goPlus, goPlusResult.hidden_owner === '0')
-      pushResult(KEY_SELF_DESTRUCT, goPlus, goPlusResult.selfdestruct === '0')
-      pushResult(KEY_EXTERNAL_CALL, goPlus, goPlusResult.external_call === '0')
-      pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
+      if(goPlusResult.is_open_source){
+        pushResult(KEY_OPENSOURCE, goPlus, goPlusResult.is_open_source === '1')
+      }
+      if(goPlusResult.is_proxy){
+        pushResult(KEY_PROXY, goPlus, goPlusResult.is_proxy === '0')
+      }
+      if(goPlusResult.is_mintable){
+
+        pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '0')
+      }
+      if(goPlusResult.can_take_back_ownership){
+
+        pushResult(KEY_TAKEOWNERSHIP, goPlus, goPlusResult.can_take_back_ownership === '0')
+      }
+      if(goPlusResult.owner_change_balance){
+
+        pushResult(KEY_OWNER_CHANGE_BALANCE, goPlus, goPlusResult.owner_change_balance === '0')
+      }
+      if(goPlusResult.owner_address){
+
+        pushResult(KEY_ADMIN_PRIVILEGES, goPlus, goPlusResult.owner_address === '')
+      }
+      if(goPlusResult.hidden_owner){
+
+        pushResult(KEY_HIDDEN_OWNER, goPlus, goPlusResult.hidden_owner === '0')
+      }
+      if(goPlusResult.selfdestruct){
+
+        pushResult(KEY_SELF_DESTRUCT, goPlus, goPlusResult.selfdestruct === '0')
+      }
+      if(goPlusResult.external_call){
+
+        pushResult(KEY_EXTERNAL_CALL, goPlus, goPlusResult.external_call === '0')
+      }
+
+      if(goPlusResult.slippage_modifiable ){
+
+        pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
+      }
       if(goPlusResult.lp_holders) {
         pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
           return total + s.is_locked === 1? parseFloat(s.percent): 0
         }, 0) < 1)
       }
-      pushHonkeby(KEY_HONEYPOT, goPlus, goPlusResult.is_honeypot === '0')
-      pushHonkeby(KEY_TRANSFER_PAUSE, goPlus, goPlusResult.transfer_pausable === '0')
-      pushHonkeby(KEY_CAN_SELL, goPlus, goPlusResult.cannot_sell_all === '0')
-      pushHonkeby(KEY_CAN_BUY, goPlus, goPlusResult.cannot_buy === '0')
-      pushHonkeby(KEY_TRADING_COOLDOWN, goPlus, goPlusResult.trading_cooldown === '0')
-      pushHonkeby(KEY_WHITELIST, goPlus, goPlusResult.is_whitelisted === '0')
-      pushHonkeby(KEY_BLACKLIST, goPlus, goPlusResult.is_blacklisted === '0')
-      pushHonkeby(KEY_PERSONAL_TAX_CHANGES, goPlus, goPlusResult.personal_slippage_modifiable === '0')
-      pushHonkeby(KEY_LIMITED_TRANSACTIONS, goPlus, goPlusResult.is_anti_whale === '0')
+      if(goPlusResult.is_honeypot){
 
+        pushHonkeby(KEY_HONEYPOT, goPlus, goPlusResult.is_honeypot === '0')
+      }
+      if(goPlusResult.transfer_pausable){
 
-      basicInfo.value.name = goPlusResult.token_name
-      basicInfo.value.symbol = goPlusResult.token_symbol
-      basicInfo.value.address = Object.entries(result[0].data.result)[0][0]
-      basicInfo.value.creator = goPlusResult.creator_address
+        pushHonkeby(KEY_TRANSFER_PAUSE, goPlus, goPlusResult.transfer_pausable === '0')
+      }
+      if(goPlusResult.cannot_sell_all){
+
+        pushHonkeby(KEY_CAN_SELL, goPlus, goPlusResult.cannot_sell_all === '0')
+      }
+      if(goPlusResult.cannot_buy){
+
+        pushHonkeby(KEY_CAN_BUY, goPlus, goPlusResult.cannot_buy === '0')
+      }
+      if(goPlusResult.trading_cooldown){
+
+        pushHonkeby(KEY_TRADING_COOLDOWN, goPlus, goPlusResult.trading_cooldown === '0')
+      }
+      if(goPlusResult.is_whitelisted ){
+
+        pushHonkeby(KEY_WHITELIST, goPlus, goPlusResult.is_whitelisted === '0')
+      }
+      if(goPlusResult.is_blacklisted){
+
+        pushHonkeby(KEY_BLACKLIST, goPlus, goPlusResult.is_blacklisted === '0')
+      }
+      if(goPlusResult.personal_slippage_modifiable){
+
+        pushHonkeby(KEY_PERSONAL_TAX_CHANGES, goPlus, goPlusResult.personal_slippage_modifiable === '0')
+      }
+      if(goPlusResult.is_anti_whale){
+        pushHonkeby(KEY_LIMITED_TRANSACTIONS, goPlus, goPlusResult.is_anti_whale === '0')
+      }
+
+      if(goPlusResult.token_name){
+
+        basicInfo.value.name = goPlusResult.token_name
+      }
+      if(goPlusResult.token_symbol){
+
+        basicInfo.value.symbol = goPlusResult.token_symbol
+      }
+
+      if(Object.entries(result[0].data.result)[0][0]){
+
+        basicInfo.value.address = Object.entries(result[0].data.result)[0][0]
+      }
+      if(goPlusResult.creator_address){
+
+        basicInfo.value.creator = goPlusResult.creator_address
+      }
       basicInfo.value.owner = goPlusResult.owner_address
       basicInfo.value.holders = goPlusResult.holder_count
-      basicInfo.value.ratio = goPlusResult.holders.reduce((total, item) => {
-        return total + parseFloat(item.percent)
-      }, 0)
+      if(goPlusResult.holders && goPlusResult.holders.length > 0){
+        basicInfo.value.ratio = goPlusResult.holders.reduce((total, item) => {
+          return total + parseFloat(item.percent)
+        }, 0)
+      }
       basicInfo.value.lp_holders = goPlusResult.lp_holder_count
       if(goPlusResult.lp_holders) {
         basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total, item) => {
@@ -692,8 +762,8 @@ const query = () => {
         }
       })
     }
-
-
+  }).catch(err => {
+    console.log(err)
   }).finally(() => {
     loading.value = false
   })
@@ -706,32 +776,51 @@ networkIdMap['bsc'] = 56
 const queryGoPlusPromise = () => {
   let networkId = 1
 
-  if (networkIdMap.has(chain.value)) {
+  if (networkIdMap[chain.value]) {
     networkId = networkIdMap[chain.value]
   }
   return axios.get(`/goplus/api/v1/token_security/${networkId}?contract_addresses=${address.value}`)
 }
 
 const queryAveAiPromise = () => {
-  return axios({
-    url: `/aveai/v1api/v2/tokens/contract?token_id=${address.value}-${chain.value}&type=token&user_address=`,
-    method: 'get',
-    headers: {
-      "x-auth": '6359bc6122e3930be34a36319ec159a41671001252326238764'
-    }
+  return new Promise((resolve, reject) => {
+    axios({
+      url: `/aveai/v1api/v2/tokens/contract?token_id=${address.value}-${chain.value}&type=token&user_address=`,
+      method: 'get',
+      headers: {
+        "x-auth": '6359bc6122e3930be34a36319ec159a41671001252326238764'
+      }
+    }).then(res => {
+      resolve(res)
+    }).catch(err => {
+      resolve(err)
+    })
   })
+
+
 }
 
 const queryBityingPromise = () => {
-  return axios.post('/bitying/ceye/contract',
-    {
-      "uname": "biteagle",
-      "chain": 2,
-      "address": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
-      "time": new Date().getTime(),
-      "sign": "fDaSGLxOsiG0lTbnVVicECexBeNMZFVtlChy+78Bb6gg+PSO3ZP5O9QkDtIkypxqQ4iXYOnNwuM4pL/juQqs8slMOID0SJZXkbZ60ZeJv2+4Y2bxM/BNxyRyltrNMnfokAe+cpliW4FWk49miapIvnRE8T9iclUgNQmRba+p9tt/505JyB8io6NfVDr/OnTc3wu5oa3GKyM/LxST+qFHP/wzphfORMdJ8fD4NdfM9dFwMQqyD5hkmXeGqiUjZ1E9Cngsm7bBPx1qBMcVS7HQEV9OPSJtsU1nil9w0lSb1t/tjsOQnY+Z4TycCLMZbluwhSAei6RjXf3fBSmrISpM6g=="
-    }
-  )
+  let networkId = 2
+  if('bsc' === chain.value){
+    networkId = 1
+  }
+  return new Promise((resolve, reject) => {
+    axios.post('/bitying/ceye/contract',
+        {
+          "uname": "biteagle",
+          "chain": networkId,
+          "address": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
+          "time": new Date().getTime(),
+          "sign": "fDaSGLxOsiG0lTbnVVicECexBeNMZFVtlChy+78Bb6gg+PSO3ZP5O9QkDtIkypxqQ4iXYOnNwuM4pL/juQqs8slMOID0SJZXkbZ60ZeJv2+4Y2bxM/BNxyRyltrNMnfokAe+cpliW4FWk49miapIvnRE8T9iclUgNQmRba+p9tt/505JyB8io6NfVDr/OnTc3wu5oa3GKyM/LxST+qFHP/wzphfORMdJ8fD4NdfM9dFwMQqyD5hkmXeGqiUjZ1E9Cngsm7bBPx1qBMcVS7HQEV9OPSJtsU1nil9w0lSb1t/tjsOQnY+Z4TycCLMZbluwhSAei6RjXf3fBSmrISpM6g=="
+        }
+    ).then(res => {
+      resolve(res)
+    }).catch(err => {
+      resolve(err)
+    })
+  })
+
 }
 
 const toPercentage = (num) => {
@@ -748,32 +837,32 @@ const isNumber = (obj) => {
 
 const riskItemNum = computed(() => {
   let risk = 0;
-  if(goplusData.value.is_honeypot === '1'){
+  if(goplusData.value.is_honeypot && goplusData.value.is_honeypot === '1'){
     risk++
   }
-  if(parseFloat(goplusData.value.sell_tax) > 0.1){
+  if(goplusData.value.sell_tax && parseFloat(goplusData.value.sell_tax) > 0.1){
     risk++
   }
-  if (parseFloat(goplusData.value.buy_tax) > 0.1){
+  if (goplusData.value.buy_tax && parseFloat(goplusData.value.buy_tax) > 0.1){
     risk++
   }
   return risk
 })
 const attentionItemNum = computed(() => {
   let attention = 0
-  if(goplusData.value.cannot_buy === '1'){
+  if(goplusData.value.cannot_buy && goplusData.value.cannot_buy === '1'){
     attention++
   }
-  if(goplusData.value.is_anti_whale === '1'){
+  if(goplusData.value.is_anti_whale && goplusData.value.is_anti_whale === '1'){
     attention++
   }
-  if(goplusData.value.slippage_modifiable === '1'){
+  if(goplusData.value.slippage_modifiable && goplusData.value.slippage_modifiable === '1'){
     attention++
   }
-  if(goplusData.value.transfer_pausable === '1'){
+  if(goplusData.value.transfer_pausable  && goplusData.value.transfer_pausable === '1'){
     attention++
   }
-  if(goplusData.value.is_mintable === '1'){
+  if(goplusData.value.is_mintable && goplusData.value.is_mintable === '1'){
     attention++
   }
   return attention
