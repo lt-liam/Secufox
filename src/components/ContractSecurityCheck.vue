@@ -35,7 +35,7 @@
       </a-row>
     </div>
   </div>
-  <a-row class="result">
+  <a-row class="result" v-show="displayResult" >
     <a-col class="list" :span="16">
       <a-card style="width: 100%;" :loading="loading">
         <div class="title">Contract Security</div>
@@ -65,7 +65,7 @@
       </a-card>
     </a-col>
     <a-col :span="8">
-      <div class="info">
+      <div class="info" >
         <div>
           <div class="title" style="margin-bottom: 0">Check Result</div>
           <div class="gauge" ref="score"></div>
@@ -143,7 +143,7 @@
             </a-list-item>
             <a-list-item>
               <template #actions>
-                <b>{{ toPercentage(basicInfo.ratio) }}</b>
+                <b>{{ toPercentage (basicInfo.ratio) }}</b>
               </template>
               <div>
                 Top10 Token Holders Ratio
@@ -210,6 +210,7 @@ import AddressDisplay from "./AddressDisplay.vue";
 import { Gauge } from '@antv/g2plot';
 
 const score = ref(null);
+const displayResult = ref(false)
 
 let gauge = null;
 
@@ -279,7 +280,7 @@ const chains = ref([{
 }]);
 
 let chain = ref('bsc');
-let address = ref('0x31230a6f280b4227efb58c3bcb51733fd3621b7a')
+let address = ref('')
 
 const KEY_OPENSOURCE = 'opensource'
 const KEY_PROXY = 'proxy'
@@ -435,15 +436,15 @@ const risks = ref([{
 
 // 基本数据
 const basicInfo = ref({
-  name: "MetamonkeyAi",
-  symbol: "MMAI",
-  address: "0xB8c7...1bDD52",
-  creator: "0xB8c7...1bDD52",
-  owner: "0xB8c7...1bDD52",
-  holders: "1093",
-  ratio: "58.17%",
-  lp_holders: "3",
-  lp_locaked: "93.17%"
+  name: "",
+  symbol: "",
+  address: "",
+  creator: "",
+  owner: "",
+  holders: "",
+  ratio: "",
+  lp_holders: "",
+  lp_locaked: ""
 })
 
 // 更多链接
@@ -551,8 +552,20 @@ const pushHonkeby = (key, value, result) => {
 
 const query = () => {
   loading.value = true
+  basicInfo.value = {
+    name: "",
+    symbol: "",
+    address: "",
+    creator: "",
+    owner: "",
+    holders: "",
+    ratio: "",
+    lp_holders: "",
+    lp_locaked: ""
+  }
   Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()])
       .then(result => {
+    displayResult.value = true
     if (result[0] && result[0].status === 200 && Object.values(result[0].data.result).length > 0) {
       let goPlusResult = Object.values(result[0].data.result)[0]
       goplusData.value = goPlusResult
@@ -825,7 +838,7 @@ const queryBityingPromise = () => {
 
 const toPercentage = (num) => {
   if (isNumber(num)) {
-    return num.toFixed(4) * 100 + '%'
+    return (num * 100).toFixed(2)  + '%'
   } else {
     return num
   }
