@@ -36,7 +36,7 @@
     </div>
   </div>
   <a-row class="result">
-    <a-col :span="16">
+    <a-col class="list" :span="16">
       <a-card style="width: 100%;" :loading="loading">
         <div class="title">Contract Security</div>
         <div v-for="result in securitys">
@@ -65,113 +65,136 @@
       </a-card>
     </a-col>
     <a-col :span="8">
-      <div>
-        <div class="title">Check Result</div>
-        <div>score: {{ basicInfo.risk_score }}</div>
-        <div>Risky item: {{ riskItemNum }}</div>
-        <div>Attention item: {{ attentionItemNum }}</div>
-        <div>checked Item : {{ scanItemNum }}</div>
-      </div>
-      <div>
-        <div class="title">Basic Info</div>
-        <a-list item-layout="horizontal" :split="false" size="small">
-          <a-list-item>
-            <template #actions>
-              <b>{{ basicInfo.name }}</b>
-            </template>
-            <div>
-              Token Name
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b>{{ basicInfo.symbol }}</b>
-            </template>
-            <div>
-              Token Symbol
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b><address-display :address="basicInfo.address" /></b>
-            </template>
-            <div>
-              Token Address
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b><address-display :address="basicInfo.creator" /></b>
-            </template>
-            <div>
-              Contract Creator
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b><address-display :address="basicInfo.owner" /></b>
-            </template>
-            <div>
-              Contract Owner
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b>{{ basicInfo.holders }}</b>
-            </template>
-            <div>
-              Token Holders
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b>{{ toPercentage(basicInfo.ratio) }}</b>
-            </template>
-            <div>
-              Top10 Token Holders Ratio
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b>{{ basicInfo.lp_holders }}</b>
-            </template>
-            <div>
-              LP Holders
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b>{{ toPercentage(basicInfo.lp_locaked) }}</b>
-            </template>
-            <div>
-              Percent of LP Locked
-            </div>
-          </a-list-item>
-        </a-list>
-      </div>
-      <div>
-        <div class="title">Trade & Liquidity</div>
-        <a-list item-layout="horizontal" :split="false" size="small">
-          <a-list-item>
-            <template #actions>
-              <b>{{ basicInfo.buy_tax }}</b>
-            </template>
-            <div>
-              Buy Tax
-            </div>
-          </a-list-item>
-          <a-list-item>
-            <template #actions>
-              <b>{{ basicInfo.sell_tax }}</b>
-            </template>
-            <div>
-              Sell Tax
-            </div>
-          </a-list-item>
-        </a-list>
-      </div>
-      <div>
-        <div class="title">More results please refer:</div>
+      <div class="info">
+        <div>
+          <div class="title" style="margin-bottom: 0">Check Result</div>
+          <div class="gauge" ref="score"></div>
+          <a-row style="margin-bottom: 36px">
+            <a-col :span="8">
+              <div><close-circle-outlined :style="{ fontSize: '25px', color: '#E54346' }" />
+                <span class="show">{{ riskItemNum }}</span>
+                <span class="item">item</span>
+              </div>
+            </a-col>
+            <a-col :span="8">
+              <div><check-circle-outlined :style="{ fontSize: '25px', color: '#4FCA81' }" />
+                <span class="show">{{ attentionItemNum }}</span>
+                <span class="item">item</span>
+              </div>
+            </a-col>
+            <a-col :span="8">
+              <div><exclamation-circle-outlined :style="{ fontSize: '25px', color: '#F5AF1C' }" />
+                <span class="show">{{ scanItemNum }}</span>
+                <span class="item">item</span>
+              </div>
+            </a-col>
+          </a-row>
+        </div>
+        <div style="margin-bottom: 36px">
+          <div class="title">Basic Info</div>
+          <a-list item-layout="horizontal" :split="false" size="small">
+            <a-list-item>
+              <template #actions>
+                <b>{{ basicInfo.name }}</b>
+              </template>
+              <div>
+                Token Name
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b>{{ basicInfo.symbol }}</b>
+              </template>
+              <div>
+                Token Symbol
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b><address-display :address="basicInfo.address" /></b>
+              </template>
+              <div>
+                Token Address
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b><address-display :address="basicInfo.creator" /></b>
+              </template>
+              <div>
+                Contract Creator
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b><address-display :address="basicInfo.owner" /></b>
+              </template>
+              <div>
+                Contract Owner
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b>{{ basicInfo.holders }}</b>
+              </template>
+              <div>
+                Token Holders
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b>{{ toPercentage(basicInfo.ratio) }}</b>
+              </template>
+              <div>
+                Top10 Token Holders Ratio
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b>{{ basicInfo.lp_holders }}</b>
+              </template>
+              <div>
+                LP Holders
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b>{{ toPercentage(basicInfo.lp_locaked) }}</b>
+              </template>
+              <div>
+                Percent of LP Locked
+              </div>
+            </a-list-item>
+          </a-list>
+        </div>
+        <div style="margin-bottom: 36px">
+          <div class="title">Trade & Liquidity</div>
+          <a-list item-layout="horizontal" :split="false" size="small">
+            <a-list-item>
+              <template #actions>
+                <b>{{ basicInfo.buy_tax }}</b>
+              </template>
+              <div>
+                Buy Tax
+              </div>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <b>{{ basicInfo.sell_tax }}</b>
+              </template>
+              <div>
+                Sell Tax
+              </div>
+            </a-list-item>
+          </a-list>
+        </div>
+        <div class="more">
+          <div class="title">More results please refer:</div>
+
+          <span v-for="link in moreLink">
+            <a :href="link.link"><img :src="link.icon" /><span>{{ link.name }}</span></a>
+          </span>
+        </div>
       </div>
     </a-col>
   </a-row>
@@ -179,14 +202,71 @@
 
 
 <script setup>
-import { computed, ref } from 'vue'
-import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { computed, ref, onMounted } from 'vue'
+import { CheckCircleOutlined, ExclamationCircleOutlined, CloseCircleOutlined } from '@ant-design/icons-vue';
 import axios from "axios";
 import AddressDisplay from "./AddressDisplay.vue";
 
+import { Gauge } from '@antv/g2plot';
+
+const score = ref(null);
+
+let gauge = null;
+
+let initChart = () => {
+  const ticks = [0, 1 / 3, 2 / 3, 1];
+  const color = ['#F4664A', '#FAAD14', '#30BF78'];
+  gauge = new Gauge(score.value, {
+    percent: 0,
+    innerRadius: 0.75,
+    type: 'meter',
+    // 自定义 meter 总步数 以及 step 占比
+    meter: {
+      steps: 50,
+      stepRatio: 0.6,
+    },
+    range: {
+      ticks: [0, 1 / 3, 2 / 3, 1],
+      color: ["#F4664A", "#FAAD14", "#30BF78"]
+    },
+    indicator: {
+      pointer: {
+        style: {
+          stroke: '#D0D0D0',
+        },
+      },
+      pin: {
+        style: {
+          stroke: '#D0D0D0',
+        },
+      },
+    },
+    statistic: {
+      content: {
+        style: ({ percent }) => {
+          return {
+            fontSize: "36px",
+            lineHeight: 1,
+            color:
+              percent < ticks[1]
+                ? color[0]
+                : percent < ticks[2]
+                  ? color[1]
+                  : color[2]
+          };
+        }
+      }
+    },
+  });
+
+  gauge.render();
+}
+
+onMounted(initChart)
+
 const SecuFox = ref('src/assets/SecuFox.png');
 
-const WarnNote = ref('Note: Results provided by third parties, we try detect all contract risks, ' +
+const WarnNote = ref('Note: Results provided by third parties, we try to detect all contract risks, ' +
   'but cannot guarantee 100% identification of all risks. ' +
   'It is recommended to use the detection results as a reference.');
 
@@ -352,13 +432,7 @@ const risks = ref([{
   label: 'limited number of transactions.',
   base_on: []
 }])
-// 校验结果数据
-const checkResult = ref({
-  error: 0,
-  warn: 1,
-  security: 20,
-  percent: 55
-})
+
 // 基本数据
 const basicInfo = ref({
   name: "MetamonkeyAi",
@@ -371,16 +445,12 @@ const basicInfo = ref({
   lp_holders: "3",
   lp_locaked: "93.17%"
 })
-// 交易和流动性
-const tradeInfo = ref({
-  buyTax: "5%",
-  sellTax: "10%"
-})
+
 // 更多链接
 const moreLink = ref([{
-  icon: "",
-  name: "",
-  link: ""
+  icon: "src/assets/Devnav.svg",
+  name: "Devnav",
+  link: "https://dexnav.com/#term-221"
 }])
 
 const loading = ref(false)
@@ -579,9 +649,9 @@ const query = () => {
         pushHonkeby(KEY_PERSONAL_TAX_CHANGES, aveAi, aveaiData.personal_slippage_modifiable === '0')
       }
       if (aveaiData.risk_score) {
-        basicInfo.value.risk_score = aveaiData.risk_score
+        gauge.changeData(aveaiData.risk_score / 100);
       } else {
-        basicInfo.value.risk_score = ''
+        gauge.changeData(0);
       }
     }
 
@@ -715,11 +785,63 @@ h3 {
 .result {
   padding: 24px 53px;
 
+  .list {
+    img {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
   .title {
     font-weight: 700;
     font-size: 24px;
     line-height: 31px;
     margin-bottom: 24px;
+  }
+
+  .info {
+
+    .show {
+      font-weight: 400;
+      font-size: 32px;
+      line-height: 42px;
+      margin-left: 10px;
+    }
+
+    .item {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 21px;
+      margin-left: 10px;
+    }
+
+    .gauge {
+      margin: 0px 50px;
+    }
+
+    margin-left: 50px;
+
+    .more {
+      a {
+        color: #383B46;
+
+        img {
+          height: 24px;
+        }
+
+        span {
+          font-weight: 700;
+          font-size: 16px;
+          line-height: 24px;
+          margin-left: 10px;
+        }
+      }
+    }
+  }
+
+  .info:deep(.ant-list-sm .ant-list-item) {
+    padding: 0;
+    line-height: 32px;
   }
 }
 </style>
