@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import {computed, defineComponent, defineProps,ref} from 'vue';
+import {computed, defineComponent,ref} from 'vue';
 import { CopyTwoTone } from '@ant-design/icons-vue';
 const props = defineProps({
   address:String

@@ -35,7 +35,7 @@
       </a-row>
     </div>
   </div>
-  <a-row class="result">
+  <a-row class="result" v-show="displayResult" >
     <a-col class="list" :span="16">
       <a-card style="width: 100%;" :loading="loading">
         <div class="title">Contract Security</div>
@@ -65,7 +65,7 @@
       </a-card>
     </a-col>
     <a-col :span="8">
-      <div class="info">
+      <div class="info" >
         <div>
           <div class="title" style="margin-bottom: 0">Check Result</div>
           <div class="gauge" ref="score"></div>
@@ -143,7 +143,7 @@
             </a-list-item>
             <a-list-item>
               <template #actions>
-                <b>{{ toPercentage(basicInfo.ratio) }}</b>
+                <b>{{ toPercentage (basicInfo.ratio) }}</b>
               </template>
               <div>
                 Top10 Token Holders Ratio
@@ -210,6 +210,7 @@ import AddressDisplay from "./AddressDisplay.vue";
 import { Gauge } from '@antv/g2plot';
 
 const score = ref(null);
+const displayResult = ref(false)
 
 let gauge = null;
 
@@ -278,8 +279,8 @@ const chains = ref([{
   label: 'ETH',
 }]);
 
-let chain = ref('eth');
-let address = ref('0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39')
+let chain = ref('bsc');
+let address = ref('')
 
 const KEY_OPENSOURCE = 'opensource'
 const KEY_PROXY = 'proxy'
@@ -435,15 +436,15 @@ const risks = ref([{
 
 // 基本数据
 const basicInfo = ref({
-  name: "MetamonkeyAi",
-  symbol: "MMAI",
-  address: "0xB8c7...1bDD52",
-  creator: "0xB8c7...1bDD52",
-  owner: "0xB8c7...1bDD52",
-  holders: "1093",
-  ratio: "58.17%",
-  lp_holders: "3",
-  lp_locaked: "93.17%"
+  name: "",
+  symbol: "",
+  address: "",
+  creator: "",
+  owner: "",
+  holders: "",
+  ratio: "",
+  lp_holders: "",
+  lp_locaked: ""
 })
 
 // 更多链接
@@ -454,6 +455,15 @@ const moreLink = ref([{
 }])
 
 const loading = ref(false)
+const goplusData = ref({
+  is_honeypot: '',
+  sell_tax: '0',
+  buy_tax: '0',
+  cannot_buy: '',
+  is_anti_whale: '',
+  slippage_modifiable: '',
+  transfer_pausable: '',
+})
 
 const aveAi = 'src/assets/AveAi.svg';
 const bitying = 'src/assets/Bitying.svg';
@@ -542,47 +552,133 @@ const pushHonkeby = (key, value, result) => {
 
 const query = () => {
   loading.value = true
-  Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()]).then(result => {
-    if (result[0] && result[0].status === 200) {
+  basicInfo.value = {
+    name: "",
+    symbol: "",
+    address: "",
+    creator: "",
+    owner: "",
+    holders: "",
+    ratio: "",
+    lp_holders: "",
+    lp_locaked: ""
+  }
+  Promise.all([queryGoPlusPromise(), queryAveAiPromise(), queryBityingPromise()])
+      .then(result => {
+    displayResult.value = true
+    if (result[0] && result[0].status === 200 && Object.values(result[0].data.result).length > 0) {
       let goPlusResult = Object.values(result[0].data.result)[0]
-      pushResult(KEY_OPENSOURCE, goPlus, goPlusResult.is_open_source === '1')
-      pushResult(KEY_PROXY, goPlus, goPlusResult.is_proxy === '0')
-      pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '1')
-      pushResult(KEY_TAKEOWNERSHIP, goPlus, goPlusResult.can_take_back_ownership === '0')
-      pushResult(KEY_OWNER_CHANGE_BALANCE, goPlus, goPlusResult.owner_change_balance === '0')
-      pushResult(KEY_ADMIN_PRIVILEGES, goPlus, goPlusResult.owner_address === '')
-      pushResult(KEY_HIDDEN_OWNER, goPlus, goPlusResult.hidden_owner === '0')
-      pushResult(KEY_SELF_DESTRUCT, goPlus, goPlusResult.selfdestruct === '0')
-      pushResult(KEY_EXTERNAL_CALL, goPlus, goPlusResult.external_call === '0')
-      pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
-      pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
-        return total && s.is_locked === 0
-      }, true))
+      goplusData.value = goPlusResult
+      if(goPlusResult.is_open_source){
+        pushResult(KEY_OPENSOURCE, goPlus, goPlusResult.is_open_source === '1')
+      }
+      if(goPlusResult.is_proxy){
+        pushResult(KEY_PROXY, goPlus, goPlusResult.is_proxy === '0')
+      }
+      if(goPlusResult.is_mintable){
 
-      pushHonkeby(KEY_HONEYPOT, goPlus, goPlusResult.is_honeypot === '0')
-      pushHonkeby(KEY_TRANSFER_PAUSE, goPlus, goPlusResult.transfer_pausable === '0')
-      pushHonkeby(KEY_CAN_SELL, goPlus, goPlusResult.cannot_sell_all === '0')
-      pushHonkeby(KEY_CAN_BUY, goPlus, goPlusResult.cannot_buy === '0')
-      pushHonkeby(KEY_TRADING_COOLDOWN, goPlus, goPlusResult.trading_cooldown === '0')
-      pushHonkeby(KEY_WHITELIST, goPlus, goPlusResult.is_whitelisted === '0')
-      pushHonkeby(KEY_BLACKLIST, goPlus, goPlusResult.is_blacklisted === '0')
-      pushHonkeby(KEY_PERSONAL_TAX_CHANGES, goPlus, goPlusResult.personal_slippage_modifiable === '0')
-      pushHonkeby(KEY_LIMITED_TRANSACTIONS, goPlus, goPlusResult.is_anti_whale === '0')
+        pushResult(KEY_MINT, goPlus, goPlusResult.is_mintable === '0')
+      }
+      if(goPlusResult.can_take_back_ownership){
 
+        pushResult(KEY_TAKEOWNERSHIP, goPlus, goPlusResult.can_take_back_ownership === '0')
+      }
+      if(goPlusResult.owner_change_balance){
 
-      basicInfo.value.name = goPlusResult.token_name
-      basicInfo.value.symbol = goPlusResult.token_symbol
-      basicInfo.value.address = Object.entries(result[0].data.result)[0][0]
-      basicInfo.value.creator = goPlusResult.creator_address
+        pushResult(KEY_OWNER_CHANGE_BALANCE, goPlus, goPlusResult.owner_change_balance === '0')
+      }
+      if(goPlusResult.owner_address){
+
+        pushResult(KEY_ADMIN_PRIVILEGES, goPlus, goPlusResult.owner_address === '')
+      }
+      if(goPlusResult.hidden_owner){
+
+        pushResult(KEY_HIDDEN_OWNER, goPlus, goPlusResult.hidden_owner === '0')
+      }
+      if(goPlusResult.selfdestruct){
+
+        pushResult(KEY_SELF_DESTRUCT, goPlus, goPlusResult.selfdestruct === '0')
+      }
+      if(goPlusResult.external_call){
+
+        pushResult(KEY_EXTERNAL_CALL, goPlus, goPlusResult.external_call === '0')
+      }
+
+      if(goPlusResult.slippage_modifiable ){
+
+        pushResult(KEY_SLIPPAGE_MODIFIED, goPlus, goPlusResult.slippage_modifiable === '0')
+      }
+      if(goPlusResult.lp_holders) {
+        pushResult(KEY_LP_LOCKED, goPlus, goPlusResult.lp_holders.reduce((total, s) => {
+          return total + s.is_locked === 1? parseFloat(s.percent): 0
+        }, 0) < 1)
+      }
+      if(goPlusResult.is_honeypot){
+
+        pushHonkeby(KEY_HONEYPOT, goPlus, goPlusResult.is_honeypot === '0')
+      }
+      if(goPlusResult.transfer_pausable){
+
+        pushHonkeby(KEY_TRANSFER_PAUSE, goPlus, goPlusResult.transfer_pausable === '0')
+      }
+      if(goPlusResult.cannot_sell_all){
+
+        pushHonkeby(KEY_CAN_SELL, goPlus, goPlusResult.cannot_sell_all === '0')
+      }
+      if(goPlusResult.cannot_buy){
+
+        pushHonkeby(KEY_CAN_BUY, goPlus, goPlusResult.cannot_buy === '0')
+      }
+      if(goPlusResult.trading_cooldown){
+
+        pushHonkeby(KEY_TRADING_COOLDOWN, goPlus, goPlusResult.trading_cooldown === '0')
+      }
+      if(goPlusResult.is_whitelisted ){
+
+        pushHonkeby(KEY_WHITELIST, goPlus, goPlusResult.is_whitelisted === '0')
+      }
+      if(goPlusResult.is_blacklisted){
+
+        pushHonkeby(KEY_BLACKLIST, goPlus, goPlusResult.is_blacklisted === '0')
+      }
+      if(goPlusResult.personal_slippage_modifiable){
+
+        pushHonkeby(KEY_PERSONAL_TAX_CHANGES, goPlus, goPlusResult.personal_slippage_modifiable === '0')
+      }
+      if(goPlusResult.is_anti_whale){
+        pushHonkeby(KEY_LIMITED_TRANSACTIONS, goPlus, goPlusResult.is_anti_whale === '0')
+      }
+
+      if(goPlusResult.token_name){
+
+        basicInfo.value.name = goPlusResult.token_name
+      }
+      if(goPlusResult.token_symbol){
+
+        basicInfo.value.symbol = goPlusResult.token_symbol
+      }
+
+      if(Object.entries(result[0].data.result)[0][0]){
+
+        basicInfo.value.address = Object.entries(result[0].data.result)[0][0]
+      }
+      if(goPlusResult.creator_address){
+
+        basicInfo.value.creator = goPlusResult.creator_address
+      }
       basicInfo.value.owner = goPlusResult.owner_address
       basicInfo.value.holders = goPlusResult.holder_count
-      basicInfo.value.ratio = goPlusResult.holders.reduce((total, item) => {
-        return total + parseFloat(item.percent)
-      }, 0)
+      if(goPlusResult.holders && goPlusResult.holders.length > 0){
+        basicInfo.value.ratio = goPlusResult.holders.reduce((total, item) => {
+          return total + parseFloat(item.percent)
+        }, 0)
+      }
       basicInfo.value.lp_holders = goPlusResult.lp_holder_count
-      basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total, item) => {
-        return total + parseFloat(item.percent)
-      }, 0)
+      if(goPlusResult.lp_holders) {
+        basicInfo.value.lp_locaked = goPlusResult.lp_holders.reduce((total, item) => {
+          return total + item.is_locked === 1? parseFloat(item.percent):0
+        }, 0)
+      }
       basicInfo.value.buy_tax = goPlusResult.buy_tax
       basicInfo.value.sell_tax = goPlusResult.sell_tax
     }
@@ -597,7 +693,7 @@ const query = () => {
         pushResult(KEY_PROXY, aveAi, aveaiData.is_proxy === '0')
       }
       if (aveaiData.has_mint_method) {
-        pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 1)
+        pushResult(KEY_MINT, aveAi, aveaiData.has_mint_method === 0)
       }
       if (aveaiData.can_take_back_ownership) {
         pushResult(KEY_TAKEOWNERSHIP, aveAi, aveaiData.can_take_back_ownership === '0')
@@ -621,7 +717,7 @@ const query = () => {
         pushResult(KEY_SLIPPAGE_MODIFIED, aveAi, aveaiData.slippage_modifiable === 0)
       }
       if (aveaiData.pair_lock_percent) {
-        pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent === 0)
+        pushResult(KEY_LP_LOCKED, aveAi, aveaiData.pair_lock_percent < 1)
       }
 
       if (aveaiData.is_honeypot) {
@@ -665,9 +761,9 @@ const query = () => {
         if (item.content === '项目方没有过多特权') {
           pushResult(KEY_ADMIN_PRIVILEGES, bitying, item.ispassed === 1)
         }
-        if (item.content === '不存在代币增发') {
-          pushResult(KEY_MINT, bitying, item.ispassed === 1)
-        }
+        // if (item.content === '不存在代币增发') {
+        //   pushResult(KEY_MINT, bitying, item.ispassed === 1)
+        // }
         if (item.content === '不能更改滑点') {
           pushResult(KEY_SLIPPAGE_MODIFIED, bitying, item.ispassed === 1)
         }
@@ -679,8 +775,8 @@ const query = () => {
         }
       })
     }
-
-
+  }).catch(err => {
+    console.log(err)
   }).finally(() => {
     loading.value = false
   })
@@ -693,37 +789,56 @@ networkIdMap['bsc'] = 56
 const queryGoPlusPromise = () => {
   let networkId = 1
 
-  if (networkIdMap.has(chain.value)) {
+  if (networkIdMap[chain.value]) {
     networkId = networkIdMap[chain.value]
   }
   return axios.get(`/goplus/api/v1/token_security/${networkId}?contract_addresses=${address.value}`)
 }
 
 const queryAveAiPromise = () => {
-  return axios({
-    url: `/aveai/v1api/v2/tokens/contract?token_id=${address.value}-${chain.value}&type=token&user_address=`,
-    method: 'get',
-    headers: {
-      "x-auth": '6359bc6122e3930be34a36319ec159a41671001252326238764'
-    }
+  return new Promise((resolve, reject) => {
+    axios({
+      url: `/aveai/v1api/v2/tokens/contract?token_id=${address.value}-${chain.value}&type=token&user_address=`,
+      method: 'get',
+      headers: {
+        "x-auth": '6359bc6122e3930be34a36319ec159a41671001252326238764'
+      }
+    }).then(res => {
+      resolve(res)
+    }).catch(err => {
+      resolve(err)
+    })
   })
+
+
 }
 
 const queryBityingPromise = () => {
-  return axios.post('/bitying/ceye/contract',
-    {
-      "uname": "biteagle",
-      "chain": 2,
-      "address": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
-      "time": new Date().getTime(),
-      "sign": "fDaSGLxOsiG0lTbnVVicECexBeNMZFVtlChy+78Bb6gg+PSO3ZP5O9QkDtIkypxqQ4iXYOnNwuM4pL/juQqs8slMOID0SJZXkbZ60ZeJv2+4Y2bxM/BNxyRyltrNMnfokAe+cpliW4FWk49miapIvnRE8T9iclUgNQmRba+p9tt/505JyB8io6NfVDr/OnTc3wu5oa3GKyM/LxST+qFHP/wzphfORMdJ8fD4NdfM9dFwMQqyD5hkmXeGqiUjZ1E9Cngsm7bBPx1qBMcVS7HQEV9OPSJtsU1nil9w0lSb1t/tjsOQnY+Z4TycCLMZbluwhSAei6RjXf3fBSmrISpM6g=="
-    }
-  )
+  let networkId = 2
+  if('bsc' === chain.value){
+    networkId = 1
+  }
+  return new Promise((resolve, reject) => {
+    axios.post('/bitying/ceye/contract',
+        {
+          "uname": "biteagle",
+          "chain": networkId,
+          "address": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
+          "time": new Date().getTime(),
+          "sign": "fDaSGLxOsiG0lTbnVVicECexBeNMZFVtlChy+78Bb6gg+PSO3ZP5O9QkDtIkypxqQ4iXYOnNwuM4pL/juQqs8slMOID0SJZXkbZ60ZeJv2+4Y2bxM/BNxyRyltrNMnfokAe+cpliW4FWk49miapIvnRE8T9iclUgNQmRba+p9tt/505JyB8io6NfVDr/OnTc3wu5oa3GKyM/LxST+qFHP/wzphfORMdJ8fD4NdfM9dFwMQqyD5hkmXeGqiUjZ1E9Cngsm7bBPx1qBMcVS7HQEV9OPSJtsU1nil9w0lSb1t/tjsOQnY+Z4TycCLMZbluwhSAei6RjXf3fBSmrISpM6g=="
+        }
+    ).then(res => {
+      resolve(res)
+    }).catch(err => {
+      resolve(err)
+    })
+  })
+
 }
 
 const toPercentage = (num) => {
   if (isNumber(num)) {
-    return num.toFixed(4) * 100 + '%'
+    return (num * 100).toFixed(2)  + '%'
   } else {
     return num
   }
@@ -734,14 +849,40 @@ const isNumber = (obj) => {
 }
 
 const riskItemNum = computed(() => {
-  return 0
+  let risk = 0;
+  if(goplusData.value.is_honeypot && goplusData.value.is_honeypot === '1'){
+    risk++
+  }
+  if(goplusData.value.sell_tax && parseFloat(goplusData.value.sell_tax) > 0.1){
+    risk++
+  }
+  if (goplusData.value.buy_tax && parseFloat(goplusData.value.buy_tax) > 0.1){
+    risk++
+  }
+  return risk
 })
 const attentionItemNum = computed(() => {
-  return 0
+  let attention = 0
+  if(goplusData.value.cannot_buy && goplusData.value.cannot_buy === '1'){
+    attention++
+  }
+  if(goplusData.value.is_anti_whale && goplusData.value.is_anti_whale === '1'){
+    attention++
+  }
+  if(goplusData.value.slippage_modifiable && goplusData.value.slippage_modifiable === '1'){
+    attention++
+  }
+  if(goplusData.value.transfer_pausable  && goplusData.value.transfer_pausable === '1'){
+    attention++
+  }
+  if(goplusData.value.is_mintable && goplusData.value.is_mintable === '1'){
+    attention++
+  }
+  return attention
 })
 
 const scanItemNum = computed(() => {
-  return 20
+  return 20 - riskItemNum.value - attentionItemNum.value
 })
 </script>
 
